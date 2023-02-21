@@ -2,6 +2,7 @@
 #include <string>
 #include <chrono>
 #include <vector>
+#include <fstream>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include "Test.h"
@@ -50,6 +51,21 @@ void ProcessInput(GLFWwindow *window)
 int main()
 {
     Init();
+
+    std::ifstream inFile("Input/test.txt");
+
+    if (inFile.is_open())
+    {
+        std::string line;
+        while (std::getline(inFile, line))
+        {
+            std::cout << line << std::endl;
+        }
+    }
+    else
+    {
+        std::cout << "Can't open file" << std::endl;
+    }
 
     // // Triangle vertex data
     // float vertices[] = {-0.5f, -0.5f, 0.0f, 0.5f, -0.5f, 0.0f, 0.0f, 0.5f, 0.0f};
@@ -135,8 +151,8 @@ int main()
         // Increment the timer by deltaTime
         timer += deltaTime;
 
-        std::cout << timer << std::endl;
-        // Swap buffer that contains render info and outputs it to the screen
+        // std::cout << timer << std::endl;
+        //  Swap buffer that contains render info and outputs it to the screen
         glfwSwapBuffers(window);
         // Check to see if any events are triggered (inputs) and updates the window state
         glfwPollEvents();
