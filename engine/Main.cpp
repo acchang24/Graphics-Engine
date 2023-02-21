@@ -11,6 +11,9 @@
 #define WIDTH 800
 #define HEIGHT 600
 
+bool isWireFrame = false;
+bool prevInput = false;
+
 // Initializes the GLFW library, and any other things required for the engine
 void Init()
 {
@@ -46,36 +49,34 @@ void ProcessInput(GLFWwindow *window)
         // Set glfwSetWindowShouldClose to true
         glfwSetWindowShouldClose(window, true);
     }
+
+    // Toggles wireframe drawing
+    if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS && !prevInput)
+    {
+        prevInput = true;
+        isWireFrame = !isWireFrame;
+    }
+    if (glfwGetKey(window, GLFW_KEY_F) == GLFW_RELEASE && prevInput)
+    {
+        prevInput = false;
+    }
 }
 
 int main()
 {
     Init();
 
-    std::ifstream inFile("Input/test.txt");
-
-    if (inFile.is_open())
-    {
-        std::string line;
-        while (std::getline(inFile, line))
-        {
-            std::cout << line << std::endl;
-        }
-    }
-    else
-    {
-        std::cout << "Can't open file" << std::endl;
-    }
-
     // Create a window
     GLFWwindow *window = glfwCreateWindow(WIDTH, HEIGHT, "Graphics Engine", NULL, NULL);
 
+    // If window creation unsuccessful, cleanup glfw and quit program
     if (!window)
     {
         std::cout << "Window creation failed" << std::endl;
         glfwTerminate();
         return -1;
     }
+
     // Set the window's context to the current one
     glfwMakeContextCurrent(window);
 
@@ -96,10 +97,22 @@ int main()
     // This registers the callback function
     glfwSetFramebufferSizeCallback(window, FrameBufferSizeCallBack);
 
-    // Triangle vertex data
-    float vertices[] = {-0.5f, -0.5f, 0.0f,
-                        0.5f, -0.5f, 0.0f,
-                        0.0f, 0.5f, 0.0f};
+    // // Triangle vertex data
+    // float vertices[] = {-0.5f, -0.5f, 0.0f,
+    //                     0.5f, -0.5f, 0.0f,
+    //                     0.0f, 0.5f, 0.0f};
+
+    // Rectangle vertex data
+    float vertices[] = {
+        0.5f, 0.5f, 0.0f,   // top right
+        0.5f, -0.5f, 0.0f,  // bottom right
+        -0.5f, -0.5f, 0.0f, // bottom left
+        -0.5f, 0.5f, 0.0f   // top left
+    };
+    unsigned int indices[] = {
+        0, 1, 3, // first triangle
+        1, 2, 3  // second triangle
+    };
 
     // Save Vertex Shader code as a const char* for now
     const char *vertexShaderSource = "#version 420 core\n"
@@ -199,16 +212,23 @@ int main()
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
 
+    //////// INITIALIZATION CODE ////////
     // Vertex buffer object
     // Generate buffer ID
     unsigned int vbo;
     glGenBuffers(1, &vbo);
 
+    // Element buffer object
+    unsigned int ebo;
+    glGenBuffers(1, &ebo);
+
     // Vertex array object
     unsigned int vao;
     glGenVertexArrays(1, &vao);
+
     // Bind the VAO with glBindVertexArray
     glBindVertexArray(vao);
+
     // Bind buffer as a vertex buffer (GL_ARRAY_BUFFER)
     // and sets the newly created buffer to the GL_ARRAY_BUFFER target
     // Copy vertives array in a buffer
@@ -224,6 +244,11 @@ int main()
     // GL_DYNAMIC_DRAW: the data is changed a lot and used many times.
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
+    // Copy index array in a element buffer
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+    // Set vertex attributes pointers
     //   Link Vertex Attributes with glVertexAttribPointer():
     // - First argument specifies which vertex attribute to configure.
     //   Specified the plocation of position vertex attribute with layout (location = 0) in the vertex shader
@@ -239,6 +264,9 @@ int main()
     // Enable vertex attribute, giving the vertex attribute location as its argument
     glEnableVertexAttribArray(0);
 
+    // uncomment this call to draw in wireframe polygons.
+    // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
     // Get a timestamp of the current time
     std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
     // A float to keep track of the time
@@ -250,13 +278,24 @@ int main()
     // loop iteration to see if GLFW needs to be closed
     while (!glfwWindowShouldClose(window))
     {
+        // Process inputs at start of frame
+        ProcessInput(window);
+
+        // Toggle wireframe draws
+        if (isWireFrame)
+        {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        }
+        else
+        {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        }
+
+        // Render
         // Clear the screen at the start of each frame
         glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
         // Clear only the color buffer for now
         glClear(GL_COLOR_BUFFER_BIT);
-
-        // Process inputs at start of frame
-        ProcessInput(window);
 
         // Get a time stamp of the current time and set that as the end time
         std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
@@ -272,24 +311,43 @@ int main()
         // Increment the timer by deltaTime
         timer += deltaTime;
 
-        // Draw triangle
+        // Draw triangles
+
+        // Set a shader program to use
         glUseProgram(shaderProgram);
+
         // Bind Vertex Array Object
         glBindVertexArray(vao);
-        // glDrawArrays to draw primitives using the active shader:
-        // - First argument takes the OpenGL primitive type to draw. In this case, draw triangles
-        // - Second argument specifies the starting index of the vertex array to draw
-        // - Last argument specifies how many vertices to draw, in this case it is 3
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+
+        // // glDrawArrays to draw primitives using the active shader:
+        // // - First argument takes the OpenGL primitive type to draw. In this case, draw triangles
+        // // - Second argument specifies the starting index of the vertex array to draw
+        // // - Last argument specifies how many vertices to draw, in this case it is 3
+        // glDrawArrays(GL_TRIANGLES, 0, 3);
+
+        //   glDrawElements takes indices from EBO currently bound to GL_ELEMENT_ARRAY_BUFFER target:
+        // - First argument specifies the mode to draw in, in this case still triangles
+        // - Second argument is the count or number of elements to draw
+        // - Third argument is type of indices which is of GL_UNSIGNED_INT
+        // - Last argument allows us to specify offset in EBO or pass in an index array
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+        // No need to unbind every time
+        // glBindVertexArray(0);
 
         // std::cout << timer << std::endl;
+
         //  Swap buffer that contains render info and outputs it to the screen
         glfwSwapBuffers(window);
         // Check to see if any events are triggered (inputs) and updates the window state
         glfwPollEvents();
     }
 
-    std::cout << "End" << std::endl;
+    // De-allocate all resources
+    glDeleteVertexArrays(1, &vao);
+    glDeleteBuffers(1, &vbo);
+    glDeleteBuffers(1, &ebo);
+    glDeleteProgram(shaderProgram);
 
     // Clean and delete all of GLFW's resources that were allocated
     glfwTerminate();
