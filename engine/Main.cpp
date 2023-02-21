@@ -8,8 +8,8 @@
 #include "Test.h"
 
 // Define a window's dimensions
-#define WIDTH 1280
-#define HEIGHT 720
+#define WIDTH 800
+#define HEIGHT 600
 
 // Initializes the GLFW library, and any other things required for the engine
 void Init()
@@ -67,28 +67,6 @@ int main()
         std::cout << "Can't open file" << std::endl;
     }
 
-    // // Triangle vertex data
-    // float vertices[] = {-0.5f, -0.5f, 0.0f, 0.5f, -0.5f, 0.0f, 0.0f, 0.5f, 0.0f};
-
-    // // Vertex buffer object
-    // // Generate buffer ID
-    // unsigned int vbo;
-    // glGenBuffers(1, &vbo);
-
-    // // Bind buffer as a vertex buffer (GL_ARRAY_BUFFER)
-    // // and sets the newly created buffer to the GL_ARRAY_BUFFER target
-    // glBindBuffer(GL_ARRAY_BUFFER, vbo);
-
-    // // Copy user defined data into a buffer that is currently bound
-    // // Takes in the type of buffer that is bound,
-    // // the size of data to pass in to the buffer in bytes,
-    // // the actual data to send into the the buffer,
-    // // and set how the data is managed by the GPU:
-    // // GL_STREAM_DRAW: the data is set only once and used by the GPU at most a few times.
-    // // GL_STATIC_DRAW: the data is set only once and used many times.
-    // // GL_DYNAMIC_DRAW: the data is changed a lot and used many times.
-    // glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
     // Create a window
     GLFWwindow *window = glfwCreateWindow(WIDTH, HEIGHT, "Graphics Engine", NULL, NULL);
 
@@ -117,6 +95,149 @@ int main()
     // Tell GLFW to call window resize function on every window resize
     // This registers the callback function
     glfwSetFramebufferSizeCallback(window, FrameBufferSizeCallBack);
+
+    // Triangle vertex data
+    float vertices[] = {-0.5f, -0.5f, 0.0f,
+                        0.5f, -0.5f, 0.0f,
+                        0.0f, 0.5f, 0.0f};
+
+    // Save Vertex Shader code as a const char* for now
+    const char *vertexShaderSource = "#version 420 core\n"
+                                     "layout(location = 0) in vec3 position;\n"
+                                     "void main()\n"
+                                     "{\n"
+                                     "gl_Position = vec4(position.x, position.y, position.z, 1.0);\n"
+                                     "}\0";
+
+    const char *fragmentShaderSource = "#version 420 core\n"
+                                       "out vec4 FragColor;\n"
+                                       "void main()\n"
+                                       "{\n"
+                                       "FragColor = vec4(1.0f, 0.0f, 0.0f, 0.0f);\n"
+                                       "}\0";
+
+    // Create a vertex shader object with glCreateShader and store its id as an int
+    unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
+
+    // Attach shader code to the shader object:
+    // Takes the shader object to compile,
+    // how many strings that are going to be passed in as source code,
+    // the actual source code of the shader,
+    // and an array of string lengths
+    glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
+    // Compile the shader
+    glCompileShader(vertexShader);
+
+    // Check to see if shader compilation was successful:
+    // Define an integer to indicate success
+    int success = 0;
+    // Storage container for any error messages
+    char infoLog[512];
+    // Get any errors
+    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
+    if (!success)
+    {
+        glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
+        std::cout << "Vertex shader compilation failed" << infoLog << std::endl;
+    }
+    else
+    {
+        glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
+        std::cout << "Vertex shader compilation success" << infoLog << std::endl;
+    }
+
+    unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
+    glCompileShader(fragmentShader);
+
+    // Check to see if shader compilation was successful:
+    // Define an integer to indicate success
+    int success1 = 0;
+    // Storage container for any error messages
+    char infoLog1[512];
+    // Get any errors
+    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success1);
+    if (!success1)
+    {
+        glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog1);
+        std::cout << "Fragment shader compilation failed" << infoLog1 << std::endl;
+    }
+    else
+    {
+        glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog1);
+        std::cout << "Fragment shader compilation success" << infoLog1 << std::endl;
+    }
+
+    // Shader program
+    // Create a shader program and return an ID reference
+    unsigned int shaderProgram = glCreateProgram();
+    // Attatch the compiled shaders to the program object
+    glAttachShader(shaderProgram, vertexShader);
+    glAttachShader(shaderProgram, fragmentShader);
+    // Link to shader program
+    glLinkProgram(shaderProgram);
+    // Check to see if program failed and retrieve the log
+    int success2 = 0;
+    char infoLog2[512];
+    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success2);
+    if (!success)
+    {
+        glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog2);
+        std::cout << "Shader program creation failed" << infoLog2 << std::endl;
+    }
+    else
+    {
+        glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog2);
+        std::cout << "Shader program creation success" << infoLog2 << std::endl;
+    }
+
+    // Activate program object with glUseProgram
+    // Every shader/rednering call will use this program object and its shaders
+    glUseProgram(shaderProgram);
+
+    // Delete shader objects once they have been linked into the program object
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
+
+    // Vertex buffer object
+    // Generate buffer ID
+    unsigned int vbo;
+    glGenBuffers(1, &vbo);
+
+    // Vertex array object
+    unsigned int vao;
+    glGenVertexArrays(1, &vao);
+    // Bind the VAO with glBindVertexArray
+    glBindVertexArray(vao);
+    // Bind buffer as a vertex buffer (GL_ARRAY_BUFFER)
+    // and sets the newly created buffer to the GL_ARRAY_BUFFER target
+    // Copy vertives array in a buffer
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
+    // Copy user defined data into a buffer that is currently bound
+    // Takes in the type of buffer that is bound,
+    // the size of data to pass in to the buffer in bytes,
+    // the actual data to send into the the buffer,
+    // and set how the data is managed by the GPU:
+    // GL_STREAM_DRAW: the data is set only once and used by the GPU at most a few times.
+    // GL_STATIC_DRAW: the data is set only once and used many times.
+    // GL_DYNAMIC_DRAW: the data is changed a lot and used many times.
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    //   Link Vertex Attributes with glVertexAttribPointer():
+    // - First argument specifies which vertex attribute to configure.
+    //   Specified the plocation of position vertex attribute with layout (location = 0) in the vertex shader
+    //   This sets location of vertex attribute to 0, and so pass in 0 for the data of this vertex attribute
+    // - Second argument specifies size of the vertex attribute. This attribute is vec3, so it takes 3 values
+    // - Third argument specifies the type of the data, which in this case is a GL_Float (vec* in GLSL)
+    // - Fourth argument specifies if the data is going to be normalized.
+    // - Fifth argument is the stride, and defines the space between consecutive vertex attributes
+    // - Last argument is type void*, and is the offset of where the position data begins in the buffer
+    //   Since the position data is at the start of the data array, it can be 0
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
+
+    // Enable vertex attribute, giving the vertex attribute location as its argument
+    glEnableVertexAttribArray(0);
 
     // Get a timestamp of the current time
     std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
@@ -150,6 +271,16 @@ int main()
 
         // Increment the timer by deltaTime
         timer += deltaTime;
+
+        // Draw triangle
+        glUseProgram(shaderProgram);
+        // Bind Vertex Array Object
+        glBindVertexArray(vao);
+        // glDrawArrays to draw primitives using the active shader:
+        // - First argument takes the OpenGL primitive type to draw. In this case, draw triangles
+        // - Second argument specifies the starting index of the vertex array to draw
+        // - Last argument specifies how many vertices to draw, in this case it is 3
+        glDrawArrays(GL_TRIANGLES, 0, 3);
 
         // std::cout << timer << std::endl;
         //  Swap buffer that contains render info and outputs it to the screen
