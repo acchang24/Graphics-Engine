@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <chrono>
+#include <cmath>
 #include <vector>
 #include <fstream>
 #include <glad/glad.h>
@@ -125,11 +126,12 @@ int main()
                                      "}\0";
 
     const char *fragmentShaderSource = "#version 420 core\n"
+                                       "uniform vec4 changeColor;\n"
                                        "in vec4 vertexColor;\n"
                                        "out vec4 FragColor;\n"
                                        "void main()\n"
                                        "{\n"
-                                       "FragColor = vertexColor;\n"
+                                       "FragColor = changeColor;\n"
                                        "}\0";
 
     // Create a vertex shader object with glCreateShader and store its id as an int
@@ -318,6 +320,16 @@ int main()
         // Draw triangles
         // Set a shader program to use
         glUseProgram(shaderProgram);
+
+        // Vary the color in range of 0.0f-1.0f using sin function
+        float greenValue = (sinf(timer) / 2.0f) + 0.5f;
+        // Query the location of uniform in shader:
+        // - Supply with shader program
+        // - the name of the uniform
+        int vertexColorLocation = glGetUniformLocation(shaderProgram, "changeColor");
+
+        // Set the uniform value using glUniform4f. Must be done after setting an active shader program to use
+        glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
 
         // Bind Vertex Array Object
         glBindVertexArray(vao);
