@@ -104,11 +104,18 @@ int main()
     //                     0.0f, 0.5f, 0.0f};
 
     // Rectangle vertex data
+    // float vertices[] = {
+    //     0.5f, 0.5f, 0.0f,   // top right
+    //     0.5f, -0.5f, 0.0f,  // bottom right
+    //     -0.5f, -0.5f, 0.0f, // bottom left
+    //     -0.5f, 0.5f, 0.0f   // top left
+    // };
+    // Rectangle vertex data with color attributes
     float vertices[] = {
-        0.5f, 0.5f, 0.0f,   // top right
-        0.5f, -0.5f, 0.0f,  // bottom right
-        -0.5f, -0.5f, 0.0f, // bottom left
-        -0.5f, 0.5f, 0.0f   // top left
+        0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,   // top right, red
+        0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,  // bottom right, green
+        -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, // bottom left, blue
+        -0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f   // top left, white
     };
     unsigned int indices[] = {
         0, 1, 3, // first triangle
@@ -118,11 +125,12 @@ int main()
     // Save Vertex Shader code as a const char* for now
     const char *vertexShaderSource = "#version 420 core\n"
                                      "layout(location = 0) in vec3 position;\n"
+                                     "layout (location = 1) in vec4 color;\n"
                                      "out vec4 vertexColor;\n"
                                      "void main()\n"
                                      "{\n"
-                                     "gl_Position = vec4(position.x, position.y, position.z, 1.0);\n"
-                                     "vertexColor = vec4(0.2f, 0.6f, 1.0f, 1.0f);\n"
+                                     "gl_Position = vec4(position, 1.0);\n"
+                                     "vertexColor = color;\n"
                                      "}\0";
 
     const char *fragmentShaderSource = "#version 420 core\n"
@@ -131,7 +139,7 @@ int main()
                                        "out vec4 FragColor;\n"
                                        "void main()\n"
                                        "{\n"
-                                       "FragColor = changeColor;\n"
+                                       "FragColor = vertexColor;\n"
                                        "}\0";
 
     // Create a vertex shader object with glCreateShader and store its id as an int
@@ -261,10 +269,15 @@ int main()
     // - Fifth argument is the stride, and defines the space between consecutive vertex attributes
     // - Last argument is type void*, and is the offset of where the position data begins in the buffer
     //   Since the position data is at the start of the data array, it can be 0
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
 
+    // Position attribute
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void *)0);
     // Enable vertex attribute, giving the vertex attribute location as its argument
     glEnableVertexAttribArray(0);
+
+    // Color attribute
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void *)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
 
     // // note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind
     // glBindBuffer(GL_ARRAY_BUFFER, 0);
