@@ -213,25 +213,18 @@ int main()
     glDeleteShader(fragmentShader);
 
     //////// INITIALIZATION CODE ////////
-    // Vertex buffer object
-    // Generate buffer ID
-    unsigned int vbo;
-    glGenBuffers(1, &vbo);
-
-    // Element buffer object
-    unsigned int ebo;
-    glGenBuffers(1, &ebo);
-
     // Vertex array object
     unsigned int vao;
     glGenVertexArrays(1, &vao);
-
-    // Bind the VAO with glBindVertexArray
+    // Bind the the new vertex array object with glBindVertexArray first,
+    // then set any vertex buffers, vertex attributes, and any index buffers
     glBindVertexArray(vao);
 
-    // Bind buffer as a vertex buffer (GL_ARRAY_BUFFER)
+    // Generate a new buffer for vertex buffer
+    unsigned int vbo;
+    glGenBuffers(1, &vbo);
+    // Bind the new buffer as a vertex buffer (GL_ARRAY_BUFFER)
     // and sets the newly created buffer to the GL_ARRAY_BUFFER target
-    // Copy vertives array in a buffer
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
     // Copy user defined data into a buffer that is currently bound
@@ -243,6 +236,10 @@ int main()
     // GL_STATIC_DRAW: the data is set only once and used many times.
     // GL_DYNAMIC_DRAW: the data is changed a lot and used many times.
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    // Genrate a new buffer for index buffer (Element buffer object)
+    unsigned int ebo;
+    glGenBuffers(1, &ebo);
 
     // Copy index array in a element buffer
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
@@ -264,8 +261,12 @@ int main()
     // Enable vertex attribute, giving the vertex attribute location as its argument
     glEnableVertexAttribArray(0);
 
-    // uncomment this call to draw in wireframe polygons.
-    // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    // // note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind
+    // glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    // // You can unbind the VAO afterwards so other VAO calls won't accidentally modify this VAO, but this rarely happens. Modifying other
+    // // VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
+    // glBindVertexArray(0);
 
     // Get a timestamp of the current time
     std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
@@ -312,7 +313,6 @@ int main()
         timer += deltaTime;
 
         // Draw triangles
-
         // Set a shader program to use
         glUseProgram(shaderProgram);
 
