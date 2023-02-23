@@ -7,6 +7,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include "Test.h"
+#include "Shader.h"
 
 // Define a window's dimensions
 #define WIDTH 800
@@ -122,108 +123,8 @@ int main()
         1, 2, 3  // second triangle
     };
 
-    // Save Vertex Shader code as a const char* for now
-    const char *vertexShaderSource = "#version 420 core\n"
-                                     "layout(location = 0) in vec3 position;\n"
-                                     "layout (location = 1) in vec4 color;\n"
-                                     "out vec4 vertexColor;\n"
-                                     "void main()\n"
-                                     "{\n"
-                                     "gl_Position = vec4(position, 1.0);\n"
-                                     "vertexColor = color;\n"
-                                     "}\0";
-
-    const char *fragmentShaderSource = "#version 420 core\n"
-                                       "uniform vec4 changeColor;\n"
-                                       "in vec4 vertexColor;\n"
-                                       "out vec4 FragColor;\n"
-                                       "void main()\n"
-                                       "{\n"
-                                       "FragColor = vertexColor;\n"
-                                       "}\0";
-
-    // Create a vertex shader object with glCreateShader and store its id as an int
-    unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
-
-    // Attach shader code to the shader object:
-    // Takes the shader object to compile,
-    // how many strings that are going to be passed in as source code,
-    // the actual source code of the shader,
-    // and an array of string lengths
-    glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-    // Compile the shader
-    glCompileShader(vertexShader);
-
-    // Check to see if shader compilation was successful:
-    // Define an integer to indicate success
-    int success = 0;
-    // Storage container for any error messages
-    char infoLog[512];
-    // Get any errors
-    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-    if (!success)
-    {
-        glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-        std::cout << "Vertex shader compilation failed" << infoLog << std::endl;
-    }
-    else
-    {
-        glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-        std::cout << "Vertex shader compilation success" << infoLog << std::endl;
-    }
-
-    unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-    glCompileShader(fragmentShader);
-
-    // Check to see if shader compilation was successful:
-    // Define an integer to indicate success
-    int success1 = 0;
-    // Storage container for any error messages
-    char infoLog1[512];
-    // Get any errors
-    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success1);
-    if (!success1)
-    {
-        glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog1);
-        std::cout << "Fragment shader compilation failed" << infoLog1 << std::endl;
-    }
-    else
-    {
-        glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog1);
-        std::cout << "Fragment shader compilation success" << infoLog1 << std::endl;
-    }
-
-    // Shader program
-    // Create a shader program and return an ID reference
-    unsigned int shaderProgram = glCreateProgram();
-    // Attatch the compiled shaders to the program object
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragmentShader);
-    // Link to shader program
-    glLinkProgram(shaderProgram);
-    // Check to see if program failed and retrieve the log
-    int success2 = 0;
-    char infoLog2[512];
-    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success2);
-    if (!success)
-    {
-        glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog2);
-        std::cout << "Shader program creation failed" << infoLog2 << std::endl;
-    }
-    else
-    {
-        glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog2);
-        std::cout << "Shader program creation success" << infoLog2 << std::endl;
-    }
-
-    // Activate program object with glUseProgram
-    // Every shader/rednering call will use this program object and its shaders
-    glUseProgram(shaderProgram);
-
-    // Delete shader objects once they have been linked into the program object
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
+    Shader shader("shaders/simpleVS.glsl", "shaders/simpleFS.glsl");
+    shader.SetActive();
 
     //////// INITIALIZATION CODE ////////
     // Vertex array object
@@ -268,8 +169,6 @@ int main()
     // - Fourth argument specifies if the data is going to be normalized.
     // - Fifth argument is the stride, and defines the space between consecutive vertex attributes
     // - Last argument is type void*, and is the offset of where the position data begins in the buffer
-    //   Since the position data is at the start of the data array, it can be 0
-
     // Position attribute
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void *)0);
     // Enable vertex attribute, giving the vertex attribute location as its argument
@@ -332,14 +231,14 @@ int main()
 
         // Draw triangles
         // Set a shader program to use
-        glUseProgram(shaderProgram);
+        shader.SetActive();
 
         // Vary the color in range of 0.0f-1.0f using sin function
         float greenValue = (sinf(timer) / 2.0f) + 0.5f;
         // Query the location of uniform in shader:
         // - Supply with shader program
         // - the name of the uniform
-        int vertexColorLocation = glGetUniformLocation(shaderProgram, "changeColor");
+        int vertexColorLocation = glGetUniformLocation(shader.GetID(), "changeColor");
 
         // Set the uniform value using glUniform4f. Must be done after setting an active shader program to use
         glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
@@ -375,7 +274,7 @@ int main()
     glDeleteVertexArrays(1, &vao);
     glDeleteBuffers(1, &vbo);
     glDeleteBuffers(1, &ebo);
-    glDeleteProgram(shaderProgram);
+    // glDeleteProgram(shaderProgram);
 
     // Clean and delete all of GLFW's resources that were allocated
     glfwTerminate();
