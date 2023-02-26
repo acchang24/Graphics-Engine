@@ -134,18 +134,24 @@ int main()
     // - Takes in the number of textures to generate
     // - The unsigned int array to store the number of textures(can be a single uint)
     glGenTextures(1, &texture);
+
     // Bind it to so any subsequent texture commands will use the currently bound texture
+    // Binding after activating a texture unit will bind the texture to that unit
+    // There is a minimum of 16 texture units to use (GL_TEXTURE0 to GL_TEXTURE15)
     glBindTexture(GL_TEXTURE_2D, texture);
-    // Set the texture's wrapping and filtering options (currently bound texture)
+
+    // Set the texture's wrapping parameters (currently bound texture)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    // Set texture filtering parameters (currently bound texture)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     // Load/Generate a texture
     int width = 0;
     int height = 0;
     int numChannels = 0;
+    stbi_set_flip_vertically_on_load(true); // Tell stb_image.h to flip loaded textures on the y axis
     // Load in texture file with stbi_load:
     // - Takes the location of the image file
     // - width, height, and number of color channels as ints
@@ -173,9 +179,40 @@ int main()
     {
         std::cout << "Failed to load texture" << std::endl;
     }
+    stbi_image_free(data);
+
+    // Texture 2
+    unsigned int texture2 = 0;
+    glGenTextures(1, &texture2);
+
+    glBindTexture(GL_TEXTURE_2D, texture2);
+
+    // Set the texture's wrapping parameters (currently bound texture)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    // Set texture filtering parameters (currently bound texture)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    data = stbi_load("assets/textures/awesomeface.png", &width, &height, &numChannels, 0);
+
+    if (data)
+    {
+        // This image also contains an alpha channel, so use GL_RGBA for 7th argument to enable transparency
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else
+    {
+        std::cout << "Failed to load texture" << std::endl;
+    }
 
     // Free the image memory
     stbi_image_free(data);
+
+    // Set each sampler to which texture unit it belongs to (only done once)
+    shader->SetInt("textureSampler", 0);
+    shader->SetInt("textureSampler2", 1);
 
     //////// INITIALIZATION CODE ////////
     // Vertex array object
@@ -298,8 +335,11 @@ int main()
         // Set the uniform value using glUniform4f. Must be done after setting an active shader program to use
         glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
 
-        // Bind the texture
+        // Bind the texture on their texture units
+        glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, texture2);
 
         // Bind Vertex Array Object
         glBindVertexArray(vao);
