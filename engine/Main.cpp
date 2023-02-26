@@ -6,6 +6,7 @@
 #include <fstream>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include "stb_image.h"
 #include "Test.h"
 #include "Shader.h"
 
@@ -111,20 +112,70 @@ int main()
     //     -0.5f, -0.5f, 0.0f, // bottom left
     //     -0.5f, 0.5f, 0.0f   // top left
     // };
-    // Rectangle vertex data with color attributes
+    // Rectangle vertex data with color attributes and textures
     float vertices[] = {
-        0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,   // top right, red
-        0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,  // bottom right, green
-        -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, // bottom left, blue
-        -0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f   // top left, white
+        0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,   // top right, red
+        0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f,  // bottom right, green
+        -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, // bottom left, blue
+        -0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f   // top left, white
     };
     unsigned int indices[] = {
         0, 1, 3, // first triangle
         1, 2, 3  // second triangle
     };
 
-    Shader shader("shaders/simpleVS.glsl", "shaders/simpleFS.glsl");
-    shader.SetActive();
+    Shader *shader = new Shader("shaders/simpleVS.glsl", "shaders/simpleFS.glsl");
+    shader->SetActive();
+
+    // Texture
+    // Create a texture reference id
+    unsigned int texture = 0;
+    // Create a texture object with glGenTextures:
+    // - Takes in the number of textures to generate
+    // - The unsigned int array to store the number of textures(can be a single uint)
+    glGenTextures(1, &texture);
+    // Bind it to so any subsequent texture commands will use the currently bound texture
+    glBindTexture(GL_TEXTURE_2D, texture);
+    // Set the texture's wrapping and filtering options (currently bound texture)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    // Load/Generate a texture
+    int width = 0;
+    int height = 0;
+    int numChannels = 0;
+    // Load in texture file with stbi_load:
+    // - Takes the location of the image file
+    // - width, height, and number of color channels as ints
+    unsigned char *data = stbi_load("assets/textures/container.jpg", &width, &height, &numChannels, 0);
+
+    if (data)
+    {
+        // Start generating a texture using the loaded image data
+        // Textures are generated with glTexImage2D:
+        // - 1st argument specifies the texture target. Setting to GL_TEXTURE_2D
+        //   will generate textures on the bound texture object at the same target
+        // - 2nd argument specifies mipmap level to create a texture for. 0 is base level
+        // - 3rd argument specifies the format to store the texture. Use RGB for now
+        // - 4th/5th arguments specifies width/height of the resulting texture
+        // - 6th argument default to 6 (legacy)
+        // - 7th/8th arguments specifies the format and datatype of the source image
+        //   Loaded the image with RGB values, and stored them as chars(bytes)
+        // - Last argument is the actual image data
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+
+        // Automatically generate all the required mipmaps for the currently bound texture
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else
+    {
+        std::cout << "Failed to load texture" << std::endl;
+    }
+
+    // Free the image memory
+    stbi_image_free(data);
 
     //////// INITIALIZATION CODE ////////
     // Vertex array object
@@ -170,13 +221,17 @@ int main()
     // - Fifth argument is the stride, and defines the space between consecutive vertex attributes
     // - Last argument is type void*, and is the offset of where the position data begins in the buffer
     // Position attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void *)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void *)0);
     // Enable vertex attribute, giving the vertex attribute location as its argument
     glEnableVertexAttribArray(0);
 
     // Color attribute
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void *)(3 * sizeof(float)));
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void *)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
+
+    // Texture attribute
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void *)(7 * sizeof(float)));
+    glEnableVertexAttribArray(2);
 
     // // note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind
     // glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -231,17 +286,20 @@ int main()
 
         // Draw triangles
         // Set a shader program to use
-        shader.SetActive();
+        shader->SetActive();
 
         // Vary the color in range of 0.0f-1.0f using sin function
         float greenValue = (sinf(timer) / 2.0f) + 0.5f;
         // Query the location of uniform in shader:
         // - Supply with shader program
         // - the name of the uniform
-        int vertexColorLocation = glGetUniformLocation(shader.GetID(), "changeColor");
+        int vertexColorLocation = glGetUniformLocation(shader->GetID(), "changeColor");
 
         // Set the uniform value using glUniform4f. Must be done after setting an active shader program to use
         glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
+
+        // Bind the texture
+        glBindTexture(GL_TEXTURE_2D, texture);
 
         // Bind Vertex Array Object
         glBindVertexArray(vao);
@@ -275,6 +333,8 @@ int main()
     glDeleteBuffers(1, &vbo);
     glDeleteBuffers(1, &ebo);
     // glDeleteProgram(shaderProgram);
+
+    delete shader;
 
     // Clean and delete all of GLFW's resources that were allocated
     glfwTerminate();

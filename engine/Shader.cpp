@@ -39,6 +39,7 @@ Shader::~Shader()
 {
     // Delete the shader program
     glDeleteProgram(mShaderID);
+    mShaderID = 0;
 }
 
 void Shader::CompileShaders(const char *vertexCode, const char *fragmentCode)
