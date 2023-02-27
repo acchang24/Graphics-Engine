@@ -5,6 +5,11 @@
 class Shader;
 class Texture;
 
+// The main Engine class that controls the graphics. Designed as a singleton
+// so that only one engine class can be instantiated at a time. This class
+// drives the input processing of any controllers/mouse/keyboard inputs,
+// updating, and rendering objects to the screen. It contains the main
+// render/game loop of the application.
 class Engine
 {
 public:
@@ -41,11 +46,15 @@ private:
     // Singleton
     static Engine *s_Engine;
 
+    // Pointer to a GLFWwindow
+    GLFWwindow *mWindow;
+
     // The simple shader
     Shader *mShader;
 
-    // Pointer to a GLFWwindow
-    GLFWwindow *mWindow;
+    // Textures
+    Texture *tex1;
+    Texture *tex2;
 
     // Float to keep track of the time
     float mTimer;
@@ -54,11 +63,7 @@ private:
     unsigned int mFps;
 
     // Int id for vertex array object
-    unsigned int vao = 0;
-
-    // Textures
-    Texture *tex1;
-    Texture *tex2;
+    unsigned int vao;
 
     // Bools for toggling between wireframe/fill
     bool mIsWireFrame;

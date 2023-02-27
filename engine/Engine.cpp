@@ -1,9 +1,7 @@
 #include "Engine.h"
 #include <iostream>
-#include <string>
 #include <cmath>
 #include <chrono>
-#include "stb_image.h"
 #include "Shader.h"
 #include "Texture.h"
 
@@ -14,7 +12,7 @@
 Engine *Engine::s_Engine = nullptr;
 
 Engine::Engine()
-    : mShader(nullptr), mWindow(nullptr), mTimer(0.0f), mIsWireFrame(false), mWirePrev(false)
+    : mWindow(nullptr), mShader(nullptr), tex1(nullptr), tex2(nullptr), mTimer(0.0f), mFps(0), vao(0), mIsWireFrame(false), mWirePrev(false)
 {
     if (s_Engine)
     {
