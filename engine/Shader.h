@@ -1,6 +1,5 @@
 #pragma once
 #include <string>
-#include <fstream>
 #include <glad/glad.h>
 
 // Shader class contains a OpenGL shader program that consists of

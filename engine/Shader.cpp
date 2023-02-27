@@ -1,5 +1,6 @@
 #include "Shader.h"
 #include <iostream>
+#include <fstream>
 
 Shader::Shader(const std::string &vertexFile, const std::string &fragmentFile)
 {
@@ -37,6 +38,7 @@ Shader::Shader(const std::string &vertexFile, const std::string &fragmentFile)
 
 Shader::~Shader()
 {
+    std::cout << "Delete shader" << std::endl;
     // Delete the shader program
     glDeleteProgram(mShaderID);
     mShaderID = 0;
@@ -106,4 +108,6 @@ void Shader::CompileShaders(const char *vertexCode, const char *fragmentCode)
     // Delete the shaders once they have been linked to the program
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
+
+    std::cout << "Delete vertex and fragment shaders" << std::endl;
 }
