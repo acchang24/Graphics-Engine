@@ -56,10 +56,7 @@ private:
     // Int id for vertex array object
     unsigned int vao = 0;
 
-    // Int ids for textures
-    //unsigned int texture1 = 0;
-    //unsigned int texture2 = 0;
-
+    // Textures
     Texture *tex1;
     Texture *tex2;
 

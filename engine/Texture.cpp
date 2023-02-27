@@ -4,7 +4,7 @@
 #include "stb_image.h"
 
 Texture::Texture(const char *textureFile)
-    : mTextureID(0)
+    : mTextureID(0), mWidth(0), mHeight(0), mNumChannels(0)
 {
     // Create a texture object with glGenTextures:
     // - Takes in the number of textures to generate
@@ -25,26 +25,22 @@ Texture::Texture(const char *textureFile)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     // Load/Generate a texture
-    // Ints to hold width height and number of color channels
-    int width = 0;
-    int height = 0;
-    int numChannels = 0;
     // Tell stb_image.h to flip loaded textures on the y axis
     stbi_set_flip_vertically_on_load(true);
     // Load in texture file with stbi_load:
     // - Takes the location of the image file
     // - width, height, and number of color channels as ints
-    unsigned char *data = stbi_load(textureFile, &width, &height, &numChannels, 0);
+    unsigned char *data = stbi_load(textureFile, &mWidth, &mHeight, &mNumChannels, 0);
 
     if (data)
     {
         // Get the format based on the number of color channels
         GLenum format;
-        if (numChannels == 3)
+        if (mNumChannels == 3)
         {
             format = GL_RGB;
         }
-        else if (numChannels == 4)
+        else if (mNumChannels == 4)
         {
             format = GL_RGBA;
         }
@@ -60,7 +56,7 @@ Texture::Texture(const char *textureFile)
         // - 7th/8th arguments specifies the format and datatype of the source image
         //   Loaded the image with RGB values, and stored them as chars(bytes)
         // - Last argument is the actual image data
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, mWidth, mHeight, 0, format, GL_UNSIGNED_BYTE, data);
 
         // Automatically generate all the required mipmaps for the currently bound texture
         glGenerateMipmap(GL_TEXTURE_2D);
@@ -79,6 +75,9 @@ Texture::~Texture()
     std::cout << "Delete texture" << std::endl;
     glDeleteTextures(1, &mTextureID);
     mTextureID = 0;
+    mWidth = 0;
+    mHeight = 0;
+    mNumChannels = 0;
 }
 
 void Texture::SetActive()
