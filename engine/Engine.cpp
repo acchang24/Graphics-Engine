@@ -5,6 +5,7 @@
 #include <chrono>
 #include "stb_image.h"
 #include "Shader.h"
+#include "Texture.h"
 
 // Define a window's dimensions
 #define WIDTH 800
@@ -87,6 +88,14 @@ void Engine::Shutdown()
     {
         delete mShader;
     }
+    if (tex1)
+    {
+        delete tex1;
+    }
+    if (tex2)
+    {
+        delete tex2;
+    }
     // Clean and delete all of GLFW's resources that were allocated
     glfwTerminate();
 }
@@ -117,91 +126,13 @@ void Engine::Run()
         1, 2, 3  // second triangle
     };
 
+    // Shader
     mShader = new Shader("shaders/simpleVS.glsl", "shaders/simpleFS.glsl");
     mShader->SetActive();
 
     // Texture
-    // Create a texture reference id
-    texture1 = 0;
-    // Create a texture object with glGenTextures:
-    // - Takes in the number of textures to generate
-    // - The unsigned int array to store the number of textures(can be a single uint)
-    glGenTextures(1, &texture1);
-
-    // Bind it to so any subsequent texture commands will use the currently bound texture
-    // Binding after activating a texture unit will bind the texture to that unit
-    // There is a minimum of 16 texture units to use (GL_TEXTURE0 to GL_TEXTURE15)
-    glBindTexture(GL_TEXTURE_2D, texture1);
-
-    // Set the texture's wrapping parameters (currently bound texture)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    // Set texture filtering parameters (currently bound texture)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    // Load/Generate a texture
-    int width = 0;
-    int height = 0;
-    int numChannels = 0;
-    stbi_set_flip_vertically_on_load(true); // Tell stb_image.h to flip loaded textures on the y axis
-    // Load in texture file with stbi_load:
-    // - Takes the location of the image file
-    // - width, height, and number of color channels as ints
-    unsigned char *data = stbi_load("assets/textures/container.jpg", &width, &height, &numChannels, 0);
-
-    if (data)
-    {
-        // Start generating a texture using the loaded image data
-        // Textures are generated with glTexImage2D:
-        // - 1st argument specifies the texture target. Setting to GL_TEXTURE_2D
-        //   will generate textures on the bound texture object at the same target
-        // - 2nd argument specifies mipmap level to create a texture for. 0 is base level
-        // - 3rd argument specifies the format to store the texture. Use RGB for now
-        // - 4th/5th arguments specifies width/height of the resulting texture
-        // - 6th argument default to 6 (legacy)
-        // - 7th/8th arguments specifies the format and datatype of the source image
-        //   Loaded the image with RGB values, and stored them as chars(bytes)
-        // - Last argument is the actual image data
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-
-        // Automatically generate all the required mipmaps for the currently bound texture
-        glGenerateMipmap(GL_TEXTURE_2D);
-    }
-    else
-    {
-        std::cout << "Failed to load texture" << std::endl;
-    }
-    stbi_image_free(data);
-
-    // Texture 2
-    texture2 = 0;
-    glGenTextures(1, &texture2);
-
-    glBindTexture(GL_TEXTURE_2D, texture2);
-
-    // Set the texture's wrapping parameters (currently bound texture)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    // Set texture filtering parameters (currently bound texture)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    data = stbi_load("assets/textures/awesomeface.png", &width, &height, &numChannels, 0);
-
-    if (data)
-    {
-        // This image also contains an alpha channel, so use GL_RGBA for 7th argument to enable transparency
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-    }
-    else
-    {
-        std::cout << "Failed to load texture" << std::endl;
-    }
-
-    // Free the image memory
-    stbi_image_free(data);
+    tex1 = new Texture("assets/textures/container.jpg");
+    tex2 = new Texture("assets/textures/awesomeface.png");
 
     // Set each sampler to which texture unit it belongs to (only done once)
     mShader->SetInt("textureSampler", 0);
@@ -363,9 +294,9 @@ void Engine::Render()
 
     // Bind the texture on their texture units
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture1);
+    tex1->SetActive();
     glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, texture2);
+    tex2->SetActive();
 
     // Bind Vertex Array Object
     glBindVertexArray(vao);

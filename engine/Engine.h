@@ -3,6 +3,7 @@
 #include <GLFW/glfw3.h>
 
 class Shader;
+class Texture;
 
 class Engine
 {
@@ -56,8 +57,11 @@ private:
     unsigned int vao = 0;
 
     // Int ids for textures
-    unsigned int texture1 = 0;
-    unsigned int texture2 = 0;
+    //unsigned int texture1 = 0;
+    //unsigned int texture2 = 0;
+
+    Texture *tex1;
+    Texture *tex2;
 
     // Bools for toggling between wireframe/fill
     bool mIsWireFrame;
