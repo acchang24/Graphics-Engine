@@ -4,9 +4,9 @@
 
 class Shader;
 class Texture;
+class VertexBuffer;
 
-// The main Engine class that controls the graphics. Designed as a singleton
-// so that only one engine class can be instantiated at a time. This class
+// The main Engine class that controls the graphics. This class
 // drives the input processing of any controllers/mouse/keyboard inputs,
 // updating, and rendering objects to the screen. It contains the main
 // render/game loop of the application.
@@ -43,14 +43,13 @@ public:
     static void FrameBufferSizeCallBack(GLFWwindow *window, int width, int height) { glViewport(0, 0, width, height); }
 
 private:
-    // Singleton
-    static Engine *s_Engine;
-
     // Pointer to a GLFWwindow
     GLFWwindow *mWindow;
 
     // The simple shader
     Shader *mShader;
+
+    VertexBuffer *vBuffer;
 
     // Textures
     Texture *tex1;
@@ -63,7 +62,7 @@ private:
     unsigned int mFps;
 
     // Int id for vertex array object
-    unsigned int vao;
+    //unsigned int vao;
 
     // Bools for toggling between wireframe/fill
     bool mIsWireFrame;

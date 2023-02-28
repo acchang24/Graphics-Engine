@@ -4,24 +4,15 @@
 #include <chrono>
 #include "Shader.h"
 #include "Texture.h"
+#include "VertexBuffer.h"
 
 // Define a window's dimensions
 #define WIDTH 800
 #define HEIGHT 600
 
-Engine *Engine::s_Engine = nullptr;
-
 Engine::Engine()
-    : mWindow(nullptr), mShader(nullptr), tex1(nullptr), tex2(nullptr), mTimer(0.0f), mFps(0), vao(0), mIsWireFrame(false), mWirePrev(false)
+    : mWindow(nullptr), mShader(nullptr), vBuffer(nullptr), tex1(nullptr), tex2(nullptr), mTimer(0.0f), mFps(0), mIsWireFrame(false), mWirePrev(false)
 {
-    if (s_Engine)
-    {
-        std::cout << "There can only be one engine" << std::endl;
-    }
-    else
-    {
-        s_Engine = this;
-    }
 }
 
 Engine::~Engine()
@@ -76,30 +67,6 @@ bool Engine::Init()
     // This registers the callback function
     glfwSetFramebufferSizeCallback(mWindow, FrameBufferSizeCallBack);
 
-    return true;
-}
-
-void Engine::Shutdown()
-{
-    std::cout << "SHUTDOWN" << std::endl;
-    if (mShader)
-    {
-        delete mShader;
-    }
-    if (tex1)
-    {
-        delete tex1;
-    }
-    if (tex2)
-    {
-        delete tex2;
-    }
-    // Clean and delete all of GLFW's resources that were allocated
-    glfwTerminate();
-}
-
-void Engine::Run()
-{
     // // Triangle vertex data
     // float vertices[] = {-0.5f, -0.5f, 0.0f,
     //                     0.5f, -0.5f, 0.0f,
@@ -121,76 +88,44 @@ void Engine::Run()
     mShader = new Shader("shaders/simpleVS.glsl", "shaders/simpleFS.glsl");
     mShader->SetActive();
 
-    // Texture
-    tex1 = new Texture("assets/textures/container.jpg");
-    tex2 = new Texture("assets/textures/awesomeface.png");
-
     // Set each sampler to which texture unit it belongs to (only done once)
     mShader->SetInt("textureSampler", 0);
     mShader->SetInt("textureSampler2", 1);
 
-    //////// INITIALIZATION CODE ////////
-    // Vertex array object
-    glGenVertexArrays(1, &vao);
-    // Bind the the new vertex array object with glBindVertexArray first,
-    // then set any vertex buffers, vertex attributes, and any index buffers
-    glBindVertexArray(vao);
+    // Texture
+    tex1 = new Texture("assets/textures/container.jpg");
+    tex2 = new Texture("assets/textures/awesomeface.png");
 
-    // Generate a new buffer for vertex buffer
-    unsigned int vbo;
-    glGenBuffers(1, &vbo);
-    // Bind the new buffer as a vertex buffer (GL_ARRAY_BUFFER)
-    // and sets the newly created buffer to the GL_ARRAY_BUFFER target
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    vBuffer = new VertexBuffer(vertices, indices, sizeof(vertices), sizeof(indices));
 
-    // Copy user defined data into a buffer that is currently bound
-    // Takes in the type of buffer that is bound,
-    // the size of data to pass in to the buffer in bytes,
-    // the actual data to send into the the buffer,
-    // and set how the data is managed by the GPU:
-    // GL_STREAM_DRAW: the data is set only once and used by the GPU at most a few times.
-    // GL_STATIC_DRAW: the data is set only once and used many times.
-    // GL_DYNAMIC_DRAW: the data is changed a lot and used many times.
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    return true;
+}
 
-    // Genrate a new buffer for index buffer (Element buffer object)
-    unsigned int ebo;
-    glGenBuffers(1, &ebo);
+void Engine::Shutdown()
+{
+    std::cout << "SHUTDOWN" << std::endl;
+    if (mShader)
+    {
+        delete mShader;
+    }
+    if (tex1)
+    {
+        delete tex1;
+    }
+    if (tex2)
+    {
+        delete tex2;
+    }
+    if (vBuffer)
+    {
+        delete vBuffer;
+    }
+    // Clean and delete all of GLFW's resources that were allocated
+    glfwTerminate();
+}
 
-    // Copy index array in a element buffer
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-    // Set vertex attributes pointers
-    //   Link Vertex Attributes with glVertexAttribPointer():
-    // - First argument specifies which vertex attribute to configure.
-    //   Specified the plocation of position vertex attribute with layout (location = 0) in the vertex shader
-    //   This sets location of vertex attribute to 0, and so pass in 0 for the data of this vertex attribute
-    // - Second argument specifies size of the vertex attribute. This attribute is vec3, so it takes 3 values
-    // - Third argument specifies the type of the data, which in this case is a GL_Float (vec* in GLSL)
-    // - Fourth argument specifies if the data is going to be normalized.
-    // - Fifth argument is the stride, and defines the space between consecutive vertex attributes
-    // - Last argument is type void*, and is the offset of where the position data begins in the buffer
-    // Position attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void *)0);
-    // Enable vertex attribute, giving the vertex attribute location as its argument
-    glEnableVertexAttribArray(0);
-
-    // Color attribute
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void *)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-
-    // Texture attribute
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void *)(7 * sizeof(float)));
-    glEnableVertexAttribArray(2);
-
-    // // note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind
-    // glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-    // // You can unbind the VAO afterwards so other VAO calls won't accidentally modify this VAO, but this rarely happens. Modifying other
-    // // VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
-    // glBindVertexArray(0);
-
+void Engine::Run()
+{
     // Get a timestamp of the current time
     std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
 
@@ -221,19 +156,15 @@ void Engine::Run()
         // Set the new starting time stamp to the current end time stamp
         start = end;
 
-        // fps = static_cast<int>(1.0f / deltaTime);
+        Update(deltaTime);
+
+        mFps = static_cast<int>(1.0f / deltaTime);
 
         // Increment the timer by deltaTime
         mTimer += deltaTime;
 
         Render();
     }
-
-    // De-allocate all resources
-    glDeleteVertexArrays(1, &vao);
-    glDeleteBuffers(1, &vbo);
-    glDeleteBuffers(1, &ebo);
-    std::cout << "Delete vertex arrays and buffers" << std::endl;
 }
 
 void Engine::ProcessInput(GLFWwindow *window)
@@ -290,7 +221,9 @@ void Engine::Render()
     tex2->SetActive();
 
     // Bind Vertex Array Object
-    glBindVertexArray(vao);
+    // glBindVertexArray(vao);
+
+    vBuffer->SetActive();
 
     // // glDrawArrays to draw primitives using the active shader:
     // // - First argument takes the OpenGL primitive type to draw. In this case, draw triangles
