@@ -15,10 +15,13 @@ out vec4 vertexColor;
 // Specify a vec2 texture output to the fragment shader
 out vec2 textureCoord;
 
+uniform mat4 transform;
+
 void main()
 {
     // Directly give a vec3 to vec4 constructor
-    gl_Position = vec4(position, 1.0f); 
+    // Multiply by transform matrix
+    gl_Position = transform * vec4(position, 1.0f); 
 
     // set the output variable to the input color from the vertex data
     vertexColor = color;

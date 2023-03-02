@@ -193,6 +193,33 @@ void Engine::ProcessInput(GLFWwindow *window)
 
 void Engine::Update(float deltaTime)
 {
+    // Identity matrix
+    glm::mat4 trans = glm::mat4(1.0f);
+
+    // Order in code is Translation, Rotation, Scale
+    // even though actual order is Scale, Rotation, Translation
+
+    // Translation
+    // trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));
+
+    // Rotation
+    // Rotate positive angle on z axis
+    trans = glm::rotate(trans, mTimer, glm::vec3(0.0, 0.0, 1.0));
+
+    // Scale
+    // Scale by 0.5
+    // trans = glm::scale(trans, glm::vec3(0.5, 0.5, 0.5));
+
+    // Get the transform uniform location from shader
+    unsigned int transformLoc = glGetUniformLocation(mShader->GetID(), "transform");
+
+    // glUniform with Matrix4fv as postfix:
+    // - Take the uniform's location
+    // - The number of matrices to send
+    // - Transpose matrix (column-major or row-major)
+    //   GLM uses column by default
+    // - The actual matrix data converted with glm::value_ptr
+    glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
 }
 
 void Engine::Render()

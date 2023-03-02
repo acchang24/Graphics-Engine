@@ -1,5 +1,6 @@
 #pragma once
 #include <glad/glad.h>
+#include <cstdlib>
 
 // The VertexBuffer class takes in all the vertex and index information
 // of an object and creates a vertex array object. Takes in a void *
