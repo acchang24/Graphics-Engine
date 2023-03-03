@@ -1,6 +1,7 @@
 #pragma once
 #include <glad/glad.h>
 #include <cstdlib>
+#include "VertexFormats.h"
 
 // The VertexBuffer class takes in all the vertex and index information
 // of an object and creates a vertex array object. Takes in a const void *
@@ -10,8 +11,10 @@
 class VertexBuffer
 {
 public:
-    VertexBuffer(const void *vertices, const void *indices, size_t vertexSize, size_t indexSize, size_t vertexStride, size_t indexStride);
+    VertexBuffer(const void *vertices, const void *indices, size_t vertexSize, size_t indexSize, size_t vertexCount, size_t indexCount, Vertex vertexFormat);
     ~VertexBuffer();
+
+    void SetVertexAttributePointers(Vertex format);
 
     void SetActive() { glBindVertexArray(mVaoID); }
 

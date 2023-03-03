@@ -7,6 +7,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "Shader.h"
 #include "Texture.h"
+#include "VertexFormats.h"
 #include "VertexBuffer.h"
 
 // Define a window's dimensions
@@ -76,16 +77,105 @@ bool Engine::Init()
     //                     0.0f, 0.5f, 0.0f};
 
     // Rectangle vertex data with color attributes and textures
-    float vertices[] = {
-        0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,   // top right, red
-        0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f,  // bottom right, green
-        -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, // bottom left, blue
-        -0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f   // top left, white
-    };
+    // VertexColoredTexture vertices[] = {
+    //     glm::vec3(0.5f, 0.5f, 0.0f), Color4(1.0f, 0.0f, 0.0f, 1.0f), glm::vec2(1.0f, 1.0f),   // top right, red
+    //     glm::vec3(0.5f, -0.5f, 0.0f), Color4(0.0f, 1.0f, 0.0f, 1.0f), glm::vec2(1.0f, 0.0f),  // bottom right, green
+    //     glm::vec3(-0.5f, -0.5f, 0.0f), Color4(0.0f, 0.0f, 1.0f, 1.0f), glm::vec2(0.0f, 0.0f), // bottom left, blue
+    //     glm::vec3(-0.5f, 0.5f, 0.0f), Color4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f)   // top left, white
+    // };
     unsigned int indices[] = {
         0, 1, 3, // first triangle
         1, 2, 3  // second triangle
     };
+
+    // VertexColoredTextureTest vertices[] = {
+    //     std::make_tuple(glm::vec3(0.5f, 0.5f, 0.0f), Color4(1.0f, 0.0f, 0.0f, 1.0f), glm::vec2(1.0f, 1.0f)),   // top right, red
+    //     std::make_tuple(glm::vec3(0.5f, -0.5f, 0.0f), Color4(0.0f, 1.0f, 0.0f, 1.0f), glm::vec2(1.0f, 0.0f)),  // bottom right, green
+    //     std::make_tuple(glm::vec3(-0.5f, -0.5f, 0.0f), Color4(0.0f, 0.0f, 1.0f, 1.0f), glm::vec2(0.0f, 0.0f)), // bottom left, blue
+    //     std::make_tuple(glm::vec3(-0.5f, 0.5f, 0.0f), Color4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f))   // top left, white
+    // };
+
+    sizeof(VertexColoredTexture);
+    sizeof(VertexColoredTextureTest);
+
+    // VertexTextureTest vertices[] = {std::make_tuple(glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec2(0.0f, 0.0f)),
+    //                                 std::make_tuple(glm::vec3(0.5f, -0.5f, -0.5f), glm::vec2(1.0f, 0.0f)),
+    //                                 std::make_tuple(glm::vec3(0.5f, 0.5f, -0.5f), glm::vec2(1.0f, 1.0f)),
+    //                                 std::make_tuple(glm::vec3(0.5f, 0.5f, -0.5f), glm::vec2(1.0f, 1.0f)),
+    //                                 std::make_tuple(glm::vec3(-0.5f, 0.5f, -0.5f), glm::vec2(0.0f, 1.0f)),
+    //                                 std::make_tuple(glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec2(0.0f, 0.0f)),
+    //                                 std::make_tuple(glm::vec3(-0.5f, -0.5f, 0.5f), glm::vec2(0.0f, 0.0f)),
+    //                                 std::make_tuple(glm::vec3(0.5f, -0.5f, 0.5f), glm::vec2(1.0f, 0.0f)),
+    //                                 std::make_tuple(glm::vec3(0.5f, 0.5f, 0.5f), glm::vec2(1.0f, 1.0f)),
+    //                                 std::make_tuple(glm::vec3(0.5f, 0.5f, 0.5f), glm::vec2(1.0f, 1.0f)),
+    //                                 std::make_tuple(glm::vec3(-0.5f, 0.5f, 0.5f), glm::vec2(0.0f, 1.0f)),
+    //                                 std::make_tuple(glm::vec3(-0.5f, -0.5f, 0.5f), glm::vec2(0.0f, 0.0f)),
+    //                                 std::make_tuple(glm::vec3(-0.5f, 0.5f, 0.5f), glm::vec2(1.0f, 0.0f)),
+    //                                 std::make_tuple(glm::vec3(-0.5f, 0.5f, -0.5f), glm::vec2(1.0f, 1.0f)),
+    //                                 std::make_tuple(glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec2(0.0f, 1.0f)),
+    //                                 std::make_tuple(glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec2(0.0f, 1.0f)),
+    //                                 std::make_tuple(glm::vec3(-0.5f, -0.5f, 0.5f), glm::vec2(0.0f, 0.0f)),
+    //                                 std::make_tuple(glm::vec3(-0.5f, 0.5f, 0.5f), glm::vec2(1.0f, 0.0f)),
+    //                                 std::make_tuple(glm::vec3(0.5f, 0.5f, 0.5f), glm::vec2(1.0f, 0.0f)),
+    //                                 std::make_tuple(glm::vec3(0.5f, 0.5f, -0.5f), glm::vec2(1.0f, 1.0f)),
+    //                                 std::make_tuple(glm::vec3(0.5f, -0.5f, -0.5f), glm::vec2(0.0f, 1.0f)),
+    //                                 std::make_tuple(glm::vec3(0.5f, -0.5f, -0.5f), glm::vec2(0.0f, 1.0f)),
+    //                                 std::make_tuple(glm::vec3(0.5f, -0.5f, 0.5f), glm::vec2(0.0f, 0.0f)),
+    //                                 std::make_tuple(glm::vec3(0.5f, 0.5f, 0.5f), glm::vec2(1.0f, 0.0f)),
+    //                                 std::make_tuple(glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec2(0.0f, 1.0f)),
+    //                                 std::make_tuple(glm::vec3(0.5f, -0.5f, -0.5f), glm::vec2(1.0f, 1.0f)),
+    //                                 std::make_tuple(glm::vec3(0.5f, -0.5f, 0.5f), glm::vec2(1.0f, 0.0f)),
+    //                                 std::make_tuple(glm::vec3(0.5f, -0.5f, 0.5f), glm::vec2(1.0f, 0.0f)),
+    //                                 std::make_tuple(glm::vec3(-0.5f, -0.5f, 0.5f), glm::vec2(0.0f, 0.0f)),
+    //                                 std::make_tuple(glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec2(0.0f, 1.0f)),
+    //                                 std::make_tuple(glm::vec3(-0.5f, 0.5f, -0.5f), glm::vec2(0.0f, 1.0f)),
+    //                                 std::make_tuple(glm::vec3(0.5f, 0.5f, -0.5f), glm::vec2(1.0f, 1.0f)),
+    //                                 std::make_tuple(glm::vec3(0.5f, 0.5f, 0.5f), glm::vec2(1.0f, 0.0f)),
+    //                                 std::make_tuple(glm::vec3(0.5f, 0.5f, 0.5f), glm::vec2(1.0f, 0.0f)),
+    //                                 std::make_tuple(glm::vec3(-0.5f, 0.5f, 0.5f), glm::vec2(0.0f, 0.0f)),
+    //                                 std::make_tuple(glm::vec3(-0.5f, 0.5f, -0.5f), glm::vec2(0.0f, 1.0f))};
+
+    VertexTexture vertices[] = {glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec2(0.0f, 0.0f),
+                                glm::vec3(0.5f, -0.5f, -0.5f), glm::vec2(1.0f, 0.0f),
+                                glm::vec3(0.5f, 0.5f, -0.5f), glm::vec2(1.0f, 1.0f),
+                                glm::vec3(0.5f, 0.5f, -0.5f), glm::vec2(1.0f, 1.0f),
+                                glm::vec3(-0.5f, 0.5f, -0.5f), glm::vec2(0.0f, 1.0f),
+                                glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec2(0.0f, 0.0f),
+
+                                glm::vec3(-0.5f, -0.5f, 0.5f), glm::vec2(0.0f, 0.0f),
+                                glm::vec3(0.5f, -0.5f, 0.5f), glm::vec2(1.0f, 0.0f),
+                                glm::vec3(0.5f, 0.5f, 0.5f), glm::vec2(1.0f, 1.0f),
+                                glm::vec3(0.5f, 0.5f, 0.5f), glm::vec2(1.0f, 1.0f),
+                                glm::vec3(-0.5f, 0.5f, 0.5f), glm::vec2(0.0f, 1.0f),
+                                glm::vec3(-0.5f, -0.5f, 0.5f), glm::vec2(0.0f, 0.0f),
+
+                                glm::vec3(-0.5f, 0.5f, 0.5f), glm::vec2(1.0f, 0.0f),
+                                glm::vec3(-0.5f, 0.5f, -0.5f), glm::vec2(1.0f, 1.0f),
+                                glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec2(0.0f, 1.0f),
+                                glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec2(0.0f, 1.0f),
+                                glm::vec3(-0.5f, -0.5f, 0.5f), glm::vec2(0.0f, 0.0f),
+                                glm::vec3(-0.5f, 0.5f, 0.5f), glm::vec2(1.0f, 0.0f),
+
+                                glm::vec3(0.5f, 0.5f, 0.5f), glm::vec2(1.0f, 0.0f),
+                                glm::vec3(0.5f, 0.5f, -0.5f), glm::vec2(1.0f, 1.0f),
+                                glm::vec3(0.5f, -0.5f, -0.5f), glm::vec2(0.0f, 1.0f),
+                                glm::vec3(0.5f, -0.5f, -0.5f), glm::vec2(0.0f, 1.0f),
+                                glm::vec3(0.5f, -0.5f, 0.5f), glm::vec2(0.0f, 0.0f),
+                                glm::vec3(0.5f, 0.5f, 0.5f), glm::vec2(1.0f, 0.0f),
+
+                                glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec2(0.0f, 1.0f),
+                                glm::vec3(0.5f, -0.5f, -0.5f), glm::vec2(1.0f, 1.0f),
+                                glm::vec3(0.5f, -0.5f, 0.5f), glm::vec2(1.0f, 0.0f),
+                                glm::vec3(0.5f, -0.5f, 0.5f), glm::vec2(1.0f, 0.0f),
+                                glm::vec3(-0.5f, -0.5f, 0.5f), glm::vec2(0.0f, 0.0f),
+                                glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec2(0.0f, 1.0f),
+
+                                glm::vec3(-0.5f, 0.5f, -0.5f), glm::vec2(0.0f, 1.0f),
+                                glm::vec3(0.5f, 0.5f, -0.5f), glm::vec2(1.0f, 1.0f),
+                                glm::vec3(0.5f, 0.5f, 0.5f), glm::vec2(1.0f, 0.0f),
+                                glm::vec3(0.5f, 0.5f, 0.5f), glm::vec2(1.0f, 0.0f),
+                                glm::vec3(-0.5f, 0.5f, 0.5f), glm::vec2(0.0f, 0.0f),
+                                glm::vec3(-0.5f, 0.5f, -0.5f), glm::vec2(0.0f, 1.0f)};
 
     // float vertices[] = {-0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
     //                     0.5f, -0.5f, -0.5f, 1.0f, 0.0f,
@@ -130,7 +220,7 @@ bool Engine::Init()
     //                     -0.5f, 0.5f, -0.5f, 0.0f, 1.0f};
 
     // Shader
-    mShader = new Shader("shaders/simpleVS.glsl", "shaders/simpleFS.glsl");
+    mShader = new Shader("shaders/texturedVS.glsl", "shaders/texturedFS.glsl");
     mShader->SetActive();
 
     // Set each sampler to which texture unit it belongs to (only done once)
@@ -141,7 +231,9 @@ bool Engine::Init()
     tex1 = new Texture("assets/textures/container.jpg");
     tex2 = new Texture("assets/textures/awesomeface.png");
 
-    vBuffer = new VertexBuffer(vertices, indices, sizeof(vertices), sizeof(indices), sizeof(float), sizeof(unsigned int));
+    std::cout << sizeof(vertices) / sizeof(VertexTexture) << std::endl;
+
+    vBuffer = new VertexBuffer(vertices, nullptr, sizeof(vertices), 0, sizeof(vertices) / sizeof(VertexTexture), 0, Vertex::VertexTexture);
 
     return true;
 }
@@ -246,7 +338,7 @@ void Engine::Update(float deltaTime)
 
     // Rotation
     // Rotate positive angle on z axis
-    trans = glm::rotate(trans, mTimer * 2, glm::vec3(0.0, 0.0, 1.0));
+    //trans = glm::rotate(trans, mTimer * 2, glm::vec3(0.0, 0.0, 1.0));
 
     // Scale
     // Scale by 0.5
@@ -268,7 +360,7 @@ void Engine::Update(float deltaTime)
     // Model matrix
     glm::mat4 model = glm::mat4(1.0f);
     // Rotate along x axis to make it look like a plane
-    model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    model = glm::rotate(model, mTimer * glm::radians(50.0f), glm::vec3(0.5, 1.0f, 0.0f));
 
     // View matrix
     glm::mat4 view = glm::mat4(1.0f);
