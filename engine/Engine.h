@@ -61,9 +61,6 @@ private:
     // Integer to track the amount of frames per second
     unsigned int mFps;
 
-    // Int id for vertex array object
-    //unsigned int vao;
-
     // Bools for toggling between wireframe/fill
     bool mIsWireFrame;
     bool mWirePrev;

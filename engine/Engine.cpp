@@ -87,6 +87,48 @@ bool Engine::Init()
         1, 2, 3  // second triangle
     };
 
+    // float vertices[] = {-0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
+    //                     0.5f, -0.5f, -0.5f, 1.0f, 0.0f,
+    //                     0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
+    //                     0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
+    //                     -0.5f, 0.5f, -0.5f, 0.0f, 1.0f,
+    //                     -0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
+
+    //                     -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
+    //                     0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
+    //                     0.5f, 0.5f, 0.5f, 1.0f, 1.0f,
+    //                     0.5f, 0.5f, 0.5f, 1.0f, 1.0f,
+    //                     -0.5f, 0.5f, 0.5f, 0.0f, 1.0f,
+    //                     -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
+
+    //                     -0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
+    //                     -0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
+    //                     -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+    //                     -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+    //                     -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
+    //                     -0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
+
+    //                     0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
+    //                     0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
+    //                     0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+    //                     0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+    //                     0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
+    //                     0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
+
+    //                     -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+    //                     0.5f, -0.5f, -0.5f, 1.0f, 1.0f,
+    //                     0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
+    //                     0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
+    //                     -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
+    //                     -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+
+    //                     -0.5f, 0.5f, -0.5f, 0.0f, 1.0f,
+    //                     0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
+    //                     0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
+    //                     0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
+    //                     -0.5f, 0.5f, 0.5f, 0.0f, 0.0f,
+    //                     -0.5f, 0.5f, -0.5f, 0.0f, 1.0f};
+
     // Shader
     mShader = new Shader("shaders/simpleVS.glsl", "shaders/simpleFS.glsl");
     mShader->SetActive();
@@ -99,7 +141,7 @@ bool Engine::Init()
     tex1 = new Texture("assets/textures/container.jpg");
     tex2 = new Texture("assets/textures/awesomeface.png");
 
-    vBuffer = new VertexBuffer(vertices, indices, sizeof(vertices), sizeof(indices));
+    vBuffer = new VertexBuffer(vertices, indices, sizeof(vertices), sizeof(indices), sizeof(float), sizeof(unsigned int));
 
     return true;
 }
@@ -204,13 +246,15 @@ void Engine::Update(float deltaTime)
 
     // Rotation
     // Rotate positive angle on z axis
-    trans = glm::rotate(trans, mTimer, glm::vec3(0.0, 0.0, 1.0));
+    trans = glm::rotate(trans, mTimer * 2, glm::vec3(0.0, 0.0, 1.0));
 
     // Scale
     // Scale by 0.5
     // trans = glm::scale(trans, glm::vec3(0.5, 0.5, 0.5));
 
-    // Get the transform uniform location from shader
+    // Query the location of uniform in shader:
+    // - Supply with shader program
+    // - the name of the uniform
     unsigned int transformLoc = glGetUniformLocation(mShader->GetID(), "transform");
 
     // glUniform with Matrix4fv as postfix:
@@ -220,6 +264,29 @@ void Engine::Update(float deltaTime)
     //   GLM uses column by default
     // - The actual matrix data converted with glm::value_ptr
     glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
+
+    // Model matrix
+    glm::mat4 model = glm::mat4(1.0f);
+    // Rotate along x axis to make it look like a plane
+    model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+
+    // View matrix
+    glm::mat4 view = glm::mat4(1.0f);
+    // View is 3 units away from origin/target
+    view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+
+    // Projection matrix
+    glm::mat4 projection;
+    // Create a persepective matrix w/ 45 degree fov
+    projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+
+    glm::mat4 viewProj = projection * view;
+
+    int modelLoc = glGetUniformLocation(mShader->GetID(), "model");
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+
+    int viewProjLoc = glGetUniformLocation(mShader->GetID(), "viewProj");
+    glUniformMatrix4fv(viewProjLoc, 1, GL_FALSE, glm::value_ptr(viewProj));
 }
 
 void Engine::Render()
@@ -234,15 +301,15 @@ void Engine::Render()
     // Set a shader program to use
     mShader->SetActive();
 
-    // Vary the color in range of 0.0f-1.0f using sin function
-    float greenValue = (sinf(mTimer) / 2.0f) + 0.5f;
-    // Query the location of uniform in shader:
-    // - Supply with shader program
-    // - the name of the uniform
-    int vertexColorLocation = glGetUniformLocation(mShader->GetID(), "changeColor");
+    // // Vary the color in range of 0.0f-1.0f using sin function
+    // float greenValue = (sinf(mTimer) / 2.0f) + 0.5f;
+    // // Query the location of uniform in shader:
+    // // - Supply with shader program
+    // // - the name of the uniform
+    // int vertexColorLocation = glGetUniformLocation(mShader->GetID(), "changeColor");
 
-    // Set the uniform value using glUniform4f. Must be done after setting an active shader program to use
-    glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
+    // // Set the uniform value using glUniform4f. Must be done after setting an active shader program to use
+    // glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
 
     // Bind the texture on their texture units
     glActiveTexture(GL_TEXTURE0);
@@ -250,23 +317,21 @@ void Engine::Render()
     glActiveTexture(GL_TEXTURE1);
     tex2->SetActive();
 
-    // Bind Vertex Array Object
-    // glBindVertexArray(vao);
+    // Draw the vertex buffer
+    vBuffer->Draw();
 
-    vBuffer->SetActive();
+    // // // glDrawArrays to draw primitives using the active shader:
+    // // // - First argument takes the OpenGL primitive type to draw. In this case, draw triangles
+    // // // - Second argument specifies the starting index of the vertex array to draw
+    // // // - Last argument specifies how many vertices to draw, in this case it is 3
+    // // glDrawArrays(GL_TRIANGLES, 0, 3);
 
-    // // glDrawArrays to draw primitives using the active shader:
-    // // - First argument takes the OpenGL primitive type to draw. In this case, draw triangles
-    // // - Second argument specifies the starting index of the vertex array to draw
-    // // - Last argument specifies how many vertices to draw, in this case it is 3
-    // glDrawArrays(GL_TRIANGLES, 0, 3);
-
-    //   glDrawElements takes indices from EBO currently bound to GL_ELEMENT_ARRAY_BUFFER target:
-    // - First argument specifies the mode to draw in, in this case still triangles
-    // - Second argument is the count or number of elements to draw
-    // - Third argument is type of indices which is of GL_UNSIGNED_INT
-    // - Last argument allows us to specify offset in EBO or pass in an index array
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    // //   glDrawElements takes indices from EBO currently bound to GL_ELEMENT_ARRAY_BUFFER target:
+    // // - First argument specifies the mode to draw in, in this case still triangles
+    // // - Second argument is the count or number of elements to draw
+    // // - Third argument is type of indices which is of GL_UNSIGNED_INT
+    // // - Last argument allows us to specify offset in EBO or pass in an index array
+    // glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
     // No need to unbind every time
     // glBindVertexArray(0);

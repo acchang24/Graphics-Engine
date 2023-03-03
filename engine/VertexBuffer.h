@@ -3,26 +3,36 @@
 #include <cstdlib>
 
 // The VertexBuffer class takes in all the vertex and index information
-// of an object and creates a vertex array object. Takes in a void *
-// as well as the byte size for both the vertices the indices.
+// of an object and creates a vertex array object. Takes in a const void *
+// for the vertex/index data, as well as the size in bytes the vertex and index arrays.
+// It also takes in the the size in bytes of the data type for the vertex/index.
 // This class will save them as buffers with an unsigned int for its ID.
 class VertexBuffer
 {
 public:
-    VertexBuffer(const void *vertices, const void *indices, size_t vertexByteSize, size_t indexByteSize);
+    VertexBuffer(const void *vertices, const void *indices, size_t vertexSize, size_t indexSize, size_t vertexStride, size_t indexStride);
     ~VertexBuffer();
 
     void SetActive() { glBindVertexArray(mVaoID); }
 
-    unsigned int GetID() { return mVaoID; }
+    unsigned int GetID() const { return mVaoID; }
+
+    void Draw();
 
 private:
     // ID for the Vertex Array Object
     unsigned int mVaoID;
 
-    // ID for the vertex buffer
+    // ID for the vertex / index buffer
     unsigned int mVertexBufferID;
 
-    // ID for the index buffer
-    unsigned mIndexBufferID;
+    unsigned int mIndexBufferID;
+
+    // Vertex and index count
+    size_t mVertexCount;
+
+    size_t mIndexCount;
+
+    // bool for if the VA draws w/ indices
+    bool mDrawIndexed;
 };
