@@ -14,12 +14,18 @@ public:
     VertexBuffer(const void *vertices, const void *indices, size_t vertexSize, size_t indexSize, size_t vertexCount, size_t indexCount, Vertex vertexFormat);
     ~VertexBuffer();
 
+    // Sets all the vertex attributes and link the 
+    // Vertex Attributes with glVertexAttribPointer():
     void SetVertexAttributePointers(Vertex format);
 
+    // Bind the Vertex Array Object
     void SetActive() { glBindVertexArray(mVaoID); }
 
+    // Getter for the VAO id
     unsigned int GetID() const { return mVaoID; }
 
+    // Sets the VAO as active, and draws based on
+    // if it is index or not
     void Draw();
 
 private:

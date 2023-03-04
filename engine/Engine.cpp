@@ -71,6 +71,9 @@ bool Engine::Init()
     // This registers the callback function
     glfwSetFramebufferSizeCallback(mWindow, FrameBufferSizeCallBack);
 
+    // Enable z-buffering
+    glEnable(GL_DEPTH_TEST);
+
     // // Triangle vertex data
     // float vertices[] = {-0.5f, -0.5f, 0.0f,
     //                     0.5f, -0.5f, 0.0f,
@@ -83,58 +86,12 @@ bool Engine::Init()
     //     glm::vec3(-0.5f, -0.5f, 0.0f), Color4(0.0f, 0.0f, 1.0f, 1.0f), glm::vec2(0.0f, 0.0f), // bottom left, blue
     //     glm::vec3(-0.5f, 0.5f, 0.0f), Color4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f)   // top left, white
     // };
-    unsigned int indices[] = {
-        0, 1, 3, // first triangle
-        1, 2, 3  // second triangle
-    };
-
-    // VertexColoredTextureTest vertices[] = {
-    //     std::make_tuple(glm::vec3(0.5f, 0.5f, 0.0f), Color4(1.0f, 0.0f, 0.0f, 1.0f), glm::vec2(1.0f, 1.0f)),   // top right, red
-    //     std::make_tuple(glm::vec3(0.5f, -0.5f, 0.0f), Color4(0.0f, 1.0f, 0.0f, 1.0f), glm::vec2(1.0f, 0.0f)),  // bottom right, green
-    //     std::make_tuple(glm::vec3(-0.5f, -0.5f, 0.0f), Color4(0.0f, 0.0f, 1.0f, 1.0f), glm::vec2(0.0f, 0.0f)), // bottom left, blue
-    //     std::make_tuple(glm::vec3(-0.5f, 0.5f, 0.0f), Color4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f))   // top left, white
+    // unsigned int indices[] = {
+    //     0, 1, 3, // first triangle
+    //     1, 2, 3  // second triangle
     // };
 
-    sizeof(VertexColoredTexture);
-    sizeof(VertexColoredTextureTest);
-
-    // VertexTextureTest vertices[] = {std::make_tuple(glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec2(0.0f, 0.0f)),
-    //                                 std::make_tuple(glm::vec3(0.5f, -0.5f, -0.5f), glm::vec2(1.0f, 0.0f)),
-    //                                 std::make_tuple(glm::vec3(0.5f, 0.5f, -0.5f), glm::vec2(1.0f, 1.0f)),
-    //                                 std::make_tuple(glm::vec3(0.5f, 0.5f, -0.5f), glm::vec2(1.0f, 1.0f)),
-    //                                 std::make_tuple(glm::vec3(-0.5f, 0.5f, -0.5f), glm::vec2(0.0f, 1.0f)),
-    //                                 std::make_tuple(glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec2(0.0f, 0.0f)),
-    //                                 std::make_tuple(glm::vec3(-0.5f, -0.5f, 0.5f), glm::vec2(0.0f, 0.0f)),
-    //                                 std::make_tuple(glm::vec3(0.5f, -0.5f, 0.5f), glm::vec2(1.0f, 0.0f)),
-    //                                 std::make_tuple(glm::vec3(0.5f, 0.5f, 0.5f), glm::vec2(1.0f, 1.0f)),
-    //                                 std::make_tuple(glm::vec3(0.5f, 0.5f, 0.5f), glm::vec2(1.0f, 1.0f)),
-    //                                 std::make_tuple(glm::vec3(-0.5f, 0.5f, 0.5f), glm::vec2(0.0f, 1.0f)),
-    //                                 std::make_tuple(glm::vec3(-0.5f, -0.5f, 0.5f), glm::vec2(0.0f, 0.0f)),
-    //                                 std::make_tuple(glm::vec3(-0.5f, 0.5f, 0.5f), glm::vec2(1.0f, 0.0f)),
-    //                                 std::make_tuple(glm::vec3(-0.5f, 0.5f, -0.5f), glm::vec2(1.0f, 1.0f)),
-    //                                 std::make_tuple(glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec2(0.0f, 1.0f)),
-    //                                 std::make_tuple(glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec2(0.0f, 1.0f)),
-    //                                 std::make_tuple(glm::vec3(-0.5f, -0.5f, 0.5f), glm::vec2(0.0f, 0.0f)),
-    //                                 std::make_tuple(glm::vec3(-0.5f, 0.5f, 0.5f), glm::vec2(1.0f, 0.0f)),
-    //                                 std::make_tuple(glm::vec3(0.5f, 0.5f, 0.5f), glm::vec2(1.0f, 0.0f)),
-    //                                 std::make_tuple(glm::vec3(0.5f, 0.5f, -0.5f), glm::vec2(1.0f, 1.0f)),
-    //                                 std::make_tuple(glm::vec3(0.5f, -0.5f, -0.5f), glm::vec2(0.0f, 1.0f)),
-    //                                 std::make_tuple(glm::vec3(0.5f, -0.5f, -0.5f), glm::vec2(0.0f, 1.0f)),
-    //                                 std::make_tuple(glm::vec3(0.5f, -0.5f, 0.5f), glm::vec2(0.0f, 0.0f)),
-    //                                 std::make_tuple(glm::vec3(0.5f, 0.5f, 0.5f), glm::vec2(1.0f, 0.0f)),
-    //                                 std::make_tuple(glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec2(0.0f, 1.0f)),
-    //                                 std::make_tuple(glm::vec3(0.5f, -0.5f, -0.5f), glm::vec2(1.0f, 1.0f)),
-    //                                 std::make_tuple(glm::vec3(0.5f, -0.5f, 0.5f), glm::vec2(1.0f, 0.0f)),
-    //                                 std::make_tuple(glm::vec3(0.5f, -0.5f, 0.5f), glm::vec2(1.0f, 0.0f)),
-    //                                 std::make_tuple(glm::vec3(-0.5f, -0.5f, 0.5f), glm::vec2(0.0f, 0.0f)),
-    //                                 std::make_tuple(glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec2(0.0f, 1.0f)),
-    //                                 std::make_tuple(glm::vec3(-0.5f, 0.5f, -0.5f), glm::vec2(0.0f, 1.0f)),
-    //                                 std::make_tuple(glm::vec3(0.5f, 0.5f, -0.5f), glm::vec2(1.0f, 1.0f)),
-    //                                 std::make_tuple(glm::vec3(0.5f, 0.5f, 0.5f), glm::vec2(1.0f, 0.0f)),
-    //                                 std::make_tuple(glm::vec3(0.5f, 0.5f, 0.5f), glm::vec2(1.0f, 0.0f)),
-    //                                 std::make_tuple(glm::vec3(-0.5f, 0.5f, 0.5f), glm::vec2(0.0f, 0.0f)),
-    //                                 std::make_tuple(glm::vec3(-0.5f, 0.5f, -0.5f), glm::vec2(0.0f, 1.0f))};
-
+    // Cube
     VertexTexture vertices[] = {glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec2(0.0f, 0.0f),
                                 glm::vec3(0.5f, -0.5f, -0.5f), glm::vec2(1.0f, 0.0f),
                                 glm::vec3(0.5f, 0.5f, -0.5f), glm::vec2(1.0f, 1.0f),
@@ -177,48 +134,6 @@ bool Engine::Init()
                                 glm::vec3(-0.5f, 0.5f, 0.5f), glm::vec2(0.0f, 0.0f),
                                 glm::vec3(-0.5f, 0.5f, -0.5f), glm::vec2(0.0f, 1.0f)};
 
-    // float vertices[] = {-0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
-    //                     0.5f, -0.5f, -0.5f, 1.0f, 0.0f,
-    //                     0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
-    //                     0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
-    //                     -0.5f, 0.5f, -0.5f, 0.0f, 1.0f,
-    //                     -0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
-
-    //                     -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
-    //                     0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
-    //                     0.5f, 0.5f, 0.5f, 1.0f, 1.0f,
-    //                     0.5f, 0.5f, 0.5f, 1.0f, 1.0f,
-    //                     -0.5f, 0.5f, 0.5f, 0.0f, 1.0f,
-    //                     -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
-
-    //                     -0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
-    //                     -0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
-    //                     -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-    //                     -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-    //                     -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
-    //                     -0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
-
-    //                     0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
-    //                     0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
-    //                     0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-    //                     0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-    //                     0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
-    //                     0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
-
-    //                     -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-    //                     0.5f, -0.5f, -0.5f, 1.0f, 1.0f,
-    //                     0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
-    //                     0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
-    //                     -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
-    //                     -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-
-    //                     -0.5f, 0.5f, -0.5f, 0.0f, 1.0f,
-    //                     0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
-    //                     0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
-    //                     0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
-    //                     -0.5f, 0.5f, 0.5f, 0.0f, 0.0f,
-    //                     -0.5f, 0.5f, -0.5f, 0.0f, 1.0f};
-
     // Shader
     mShader = new Shader("shaders/texturedVS.glsl", "shaders/texturedFS.glsl");
     mShader->SetActive();
@@ -231,8 +146,7 @@ bool Engine::Init()
     tex1 = new Texture("assets/textures/container.jpg");
     tex2 = new Texture("assets/textures/awesomeface.png");
 
-    std::cout << sizeof(vertices) / sizeof(VertexTexture) << std::endl;
-
+    // Vertex buffer
     vBuffer = new VertexBuffer(vertices, nullptr, sizeof(vertices), 0, sizeof(vertices) / sizeof(VertexTexture), 0, Vertex::VertexTexture);
 
     return true;
@@ -327,40 +241,13 @@ void Engine::ProcessInput(GLFWwindow *window)
 
 void Engine::Update(float deltaTime)
 {
-    // Identity matrix
-    glm::mat4 trans = glm::mat4(1.0f);
-
+    // Model matrix
     // Order in code is Translation, Rotation, Scale
     // even though actual order is Scale, Rotation, Translation
-
-    // Translation
-    // trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));
-
-    // Rotation
-    // Rotate positive angle on z axis
-    //trans = glm::rotate(trans, mTimer * 2, glm::vec3(0.0, 0.0, 1.0));
-
-    // Scale
-    // Scale by 0.5
-    // trans = glm::scale(trans, glm::vec3(0.5, 0.5, 0.5));
-
-    // Query the location of uniform in shader:
-    // - Supply with shader program
-    // - the name of the uniform
-    unsigned int transformLoc = glGetUniformLocation(mShader->GetID(), "transform");
-
-    // glUniform with Matrix4fv as postfix:
-    // - Take the uniform's location
-    // - The number of matrices to send
-    // - Transpose matrix (column-major or row-major)
-    //   GLM uses column by default
-    // - The actual matrix data converted with glm::value_ptr
-    glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
-
-    // Model matrix
     glm::mat4 model = glm::mat4(1.0f);
-    // Rotate along x axis to make it look like a plane
+    // model = glm::translate(model, glm::vec3(0.3f, 0.1f, 0.0f));
     model = glm::rotate(model, mTimer * glm::radians(50.0f), glm::vec3(0.5, 1.0f, 0.0f));
+    // model = glm::scale(model, glm::vec3(0.5, 0.5, 0.5));
 
     // View matrix
     glm::mat4 view = glm::mat4(1.0f);
@@ -372,9 +259,19 @@ void Engine::Update(float deltaTime)
     // Create a persepective matrix w/ 45 degree fov
     projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
 
+    // Read multiplication right-left
     glm::mat4 viewProj = projection * view;
 
+    // Query the location of uniform in shader:
+    // - Supply with shader program
+    // - the name of the uniform
     int modelLoc = glGetUniformLocation(mShader->GetID(), "model");
+    // glUniform with Matrix4fv as postfix:
+    // - Take the uniform's location
+    // - The number of matrices to send
+    // - Transpose matrix (column-major or row-major)
+    //   GLM uses column by default
+    // - The actual matrix data converted with glm::value_ptr
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 
     int viewProjLoc = glGetUniformLocation(mShader->GetID(), "viewProj");
@@ -386,22 +283,12 @@ void Engine::Render()
     // Render
     // Clear the screen at the start of each frame
     glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
-    // Clear only the color buffer for now
-    glClear(GL_COLOR_BUFFER_BIT);
+    // Clear the color/depth buffers
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Draw triangles
     // Set a shader program to use
     mShader->SetActive();
-
-    // // Vary the color in range of 0.0f-1.0f using sin function
-    // float greenValue = (sinf(mTimer) / 2.0f) + 0.5f;
-    // // Query the location of uniform in shader:
-    // // - Supply with shader program
-    // // - the name of the uniform
-    // int vertexColorLocation = glGetUniformLocation(mShader->GetID(), "changeColor");
-
-    // // Set the uniform value using glUniform4f. Must be done after setting an active shader program to use
-    // glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
 
     // Bind the texture on their texture units
     glActiveTexture(GL_TEXTURE0);
@@ -411,22 +298,6 @@ void Engine::Render()
 
     // Draw the vertex buffer
     vBuffer->Draw();
-
-    // // // glDrawArrays to draw primitives using the active shader:
-    // // // - First argument takes the OpenGL primitive type to draw. In this case, draw triangles
-    // // // - Second argument specifies the starting index of the vertex array to draw
-    // // // - Last argument specifies how many vertices to draw, in this case it is 3
-    // // glDrawArrays(GL_TRIANGLES, 0, 3);
-
-    // //   glDrawElements takes indices from EBO currently bound to GL_ELEMENT_ARRAY_BUFFER target:
-    // // - First argument specifies the mode to draw in, in this case still triangles
-    // // - Second argument is the count or number of elements to draw
-    // // - Third argument is type of indices which is of GL_UNSIGNED_INT
-    // // - Last argument allows us to specify offset in EBO or pass in an index array
-    // glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-
-    // No need to unbind every time
-    // glBindVertexArray(0);
 
     //  Swap buffer that contains render info and outputs it to the screen
     glfwSwapBuffers(mWindow);

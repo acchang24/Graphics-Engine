@@ -39,29 +39,6 @@ VertexBuffer::VertexBuffer(const void *vertices, const void *indices, size_t ver
     }
 
     SetVertexAttributePointers(vertexFormat);
-
-    // Set vertex attributes pointers
-    //   Link Vertex Attributes with glVertexAttribPointer():
-    // - First argument specifies which vertex attribute to configure.
-    //   Specified the plocation of position vertex attribute with layout (location = 0) in the vertex shader
-    //   This sets location of vertex attribute to 0, and so pass in 0 for the data of this vertex attribute
-    // - Second argument specifies size of the vertex attribute. This attribute is vec3, so it takes 3 values
-    // - Third argument specifies the type of the data, which in this case is a GL_Float (vec* in GLSL)
-    // - Fourth argument specifies if the data is going to be normalized.
-    // - Fifth argument is the stride, and defines the space between consecutive vertex attributes
-    // - Last argument is type void*, and is the offset of where the position data begins in the buffer
-    // Position attribute
-    // glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void *)0);
-    // // Enable vertex attribute, giving the vertex attribute location as its argument
-    // glEnableVertexAttribArray(0);
-
-    // // Color attribute
-    // glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void *)(3 * sizeof(float)));
-    // glEnableVertexAttribArray(1);
-
-    // // Texture attribute
-    // glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void *)(7 * sizeof(float)));
-    // glEnableVertexAttribArray(2);
 }
 
 VertexBuffer::~VertexBuffer()
@@ -102,8 +79,8 @@ void VertexBuffer::SetVertexAttributePointers(Vertex format)
         // - Fifth argument is the stride, and defines the space between consecutive vertex attributes
         // - Last argument is type void*, and is the offset of where the position data begins in the buffer
         glVertexAttribPointer(i, strides[i], GL_FLOAT, GL_FALSE, totalStride * sizeof(float), (void *)(spacing * sizeof(float)));
-        spacing += strides[i];
         glEnableVertexAttribArray(i);
+        spacing += strides[i];
     }
 }
 
