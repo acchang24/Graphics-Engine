@@ -142,8 +142,8 @@ bool Engine::Init()
     tex2 = new Texture("assets/textures/awesomeface.png");
 
     // Vertex buffer
+    // vBuffer = new VertexBuffer(vertices, indices, sizeof(vertices), sizeof(indices), sizeof(vertices) / sizeof(VertexTexture), sizeof(indices) / sizeof(unsigned int), Vertex::VertexTexture);
     vBuffer = new VertexBuffer(vertices, 0, sizeof(vertices), 0, sizeof(vertices) / sizeof(VertexTexture), 0, Vertex::VertexTexture);
-    // vBuffer = new VertexBuffer(vertices, nullptr, sizeof(vertices), 0, sizeof(vertices) / sizeof(VertexTexture), 0, Vertex::VertexTexture);
 
     std::vector<Texture *> textures = {tex1, tex2};
 
