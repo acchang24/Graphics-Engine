@@ -4,28 +4,32 @@
 #include "VertexFormats.h"
 
 // The VertexBuffer class takes in all the vertex and index information
-// of an object and creates a vertex array object. Takes in a const void *
-// for the vertex/index data, as well as the size in bytes the vertex and index arrays.
-// It also takes in the the size in bytes of the data type for the vertex/index.
-// This class will save them as buffers with an unsigned int for its ID.
+// of an object and creates an OpenGL Vertex Array Object. This class will save
+// the VAO and the vertex/index buffers with an unsigned int that can be referenced
+// later with its ID.
 class VertexBuffer
 {
 public:
+    //   Constructor of VertexBuffer:
+    // - 2 const void* for the actual vertex/index data
+    // - 2 size_t for the size in bytes of the vertex/index arrays
+    // - 2 size_t for the number of vertices and indices
+    // - enum class Vertex for the format of the vertex
     VertexBuffer(const void *vertices, const void *indices, size_t vertexSize, size_t indexSize, size_t vertexCount, size_t indexCount, Vertex vertexFormat);
     ~VertexBuffer();
 
-    // Sets all the vertex attributes and link the 
-    // Vertex Attributes with glVertexAttribPointer():
+    //   SetVertexAttributePointers sets all the vertex attributes
+    //   and links the Vertex Attributes with glVertexAttribPointer:
+    // - Takes in an enum class of Vertex that represents the format of the vertex
     void SetVertexAttributePointers(Vertex format);
 
-    // Bind the Vertex Array Object
+    // Bind the Vertex Array Object using glBindVertexArray with mVaoID as its parameter
     void SetActive() { glBindVertexArray(mVaoID); }
 
-    // Getter for the VAO id
+    // Getter for the Vertex Array's ID
     unsigned int GetID() const { return mVaoID; }
 
-    // Sets the VAO as active, and draws based on
-    // if it is index or not
+    // Sets the VAO as active, and draws based on if it is drawn with indices or not
     void Draw();
 
 private:

@@ -9,13 +9,14 @@
 #include "Texture.h"
 #include "VertexFormats.h"
 #include "VertexBuffer.h"
+#include "RenderObj.h"
 
 // Define a window's dimensions
 #define WIDTH 800
 #define HEIGHT 600
 
 Engine::Engine()
-    : mWindow(nullptr), mShader(nullptr), vBuffer(nullptr), tex1(nullptr), tex2(nullptr), mTimer(0.0f), mFps(0), mIsWireFrame(false), mWirePrev(false)
+    : mWindow(nullptr), mShader(nullptr), vBuffer(nullptr), tex1(nullptr), tex2(nullptr), cube(nullptr), mTimer(0.0f), mFps(0), mIsWireFrame(false), mWirePrev(false)
 {
 }
 
@@ -74,17 +75,11 @@ bool Engine::Init()
     // Enable z-buffering
     glEnable(GL_DEPTH_TEST);
 
-    // // Triangle vertex data
-    // float vertices[] = {-0.5f, -0.5f, 0.0f,
-    //                     0.5f, -0.5f, 0.0f,
-    //                     0.0f, 0.5f, 0.0f};
-
-    // Rectangle vertex data with color attributes and textures
-    // VertexColoredTexture vertices[] = {
-    //     glm::vec3(0.5f, 0.5f, 0.0f), Color4(1.0f, 0.0f, 0.0f, 1.0f), glm::vec2(1.0f, 1.0f),   // top right, red
-    //     glm::vec3(0.5f, -0.5f, 0.0f), Color4(0.0f, 1.0f, 0.0f, 1.0f), glm::vec2(1.0f, 0.0f),  // bottom right, green
-    //     glm::vec3(-0.5f, -0.5f, 0.0f), Color4(0.0f, 0.0f, 1.0f, 1.0f), glm::vec2(0.0f, 0.0f), // bottom left, blue
-    //     glm::vec3(-0.5f, 0.5f, 0.0f), Color4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f)   // top left, white
+    // VertexTexture vertices[] = {
+    //     glm::vec3(0.5f, 0.5f, 0.0f), glm::vec2(1.0f, 1.0f),   // top right
+    //     glm::vec3(0.5f, -0.5f, 0.0f), glm::vec2(1.0f, 0.0f),  // bottom right
+    //     glm::vec3(-0.5f, -0.5f, 0.0f), glm::vec2(0.0f, 0.0f), // bottom left
+    //     glm::vec3(-0.5f, 0.5f, 0.0f), glm::vec2(0.0f, 1.0f)   // top left
     // };
     // unsigned int indices[] = {
     //     0, 1, 3, // first triangle
@@ -147,7 +142,12 @@ bool Engine::Init()
     tex2 = new Texture("assets/textures/awesomeface.png");
 
     // Vertex buffer
-    vBuffer = new VertexBuffer(vertices, nullptr, sizeof(vertices), 0, sizeof(vertices) / sizeof(VertexTexture), 0, Vertex::VertexTexture);
+    vBuffer = new VertexBuffer(vertices, 0, sizeof(vertices), 0, sizeof(vertices) / sizeof(VertexTexture), 0, Vertex::VertexTexture);
+    // vBuffer = new VertexBuffer(vertices, nullptr, sizeof(vertices), 0, sizeof(vertices) / sizeof(VertexTexture), 0, Vertex::VertexTexture);
+
+    std::vector<Texture *> textures = {tex1, tex2};
+
+    cube = new RenderObj(vBuffer, mShader, textures);
 
     return true;
 }
@@ -155,22 +155,13 @@ bool Engine::Init()
 void Engine::Shutdown()
 {
     std::cout << "SHUTDOWN" << std::endl;
-    if (mShader)
-    {
-        delete mShader;
-    }
-    if (tex1)
-    {
-        delete tex1;
-    }
-    if (tex2)
-    {
-        delete tex2;
-    }
-    if (vBuffer)
-    {
-        delete vBuffer;
-    }
+
+    delete mShader;
+    delete tex1;
+    delete tex2;
+    delete vBuffer;
+    delete cube;
+
     // Clean and delete all of GLFW's resources that were allocated
     glfwTerminate();
 }
@@ -241,13 +232,8 @@ void Engine::ProcessInput(GLFWwindow *window)
 
 void Engine::Update(float deltaTime)
 {
-    // Model matrix
-    // Order in code is Translation, Rotation, Scale
-    // even though actual order is Scale, Rotation, Translation
-    glm::mat4 model = glm::mat4(1.0f);
-    // model = glm::translate(model, glm::vec3(0.3f, 0.1f, 0.0f));
-    model = glm::rotate(model, mTimer * glm::radians(50.0f), glm::vec3(0.5, 1.0f, 0.0f));
-    // model = glm::scale(model, glm::vec3(0.5, 0.5, 0.5));
+    // Update the object
+    cube->Update(deltaTime);
 
     // View matrix
     glm::mat4 view = glm::mat4(1.0f);
@@ -262,19 +248,9 @@ void Engine::Update(float deltaTime)
     // Read multiplication right-left
     glm::mat4 viewProj = projection * view;
 
-    // Query the location of uniform in shader:
-    // - Supply with shader program
-    // - the name of the uniform
-    int modelLoc = glGetUniformLocation(mShader->GetID(), "model");
-    // glUniform with Matrix4fv as postfix:
-    // - Take the uniform's location
-    // - The number of matrices to send
-    // - Transpose matrix (column-major or row-major)
-    //   GLM uses column by default
-    // - The actual matrix data converted with glm::value_ptr
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-
+    // Get location of viewProj in shader
     int viewProjLoc = glGetUniformLocation(mShader->GetID(), "viewProj");
+    // Update viewProj
     glUniformMatrix4fv(viewProjLoc, 1, GL_FALSE, glm::value_ptr(viewProj));
 }
 
@@ -286,18 +262,8 @@ void Engine::Render()
     // Clear the color/depth buffers
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    // Draw triangles
-    // Set a shader program to use
-    mShader->SetActive();
-
-    // Bind the texture on their texture units
-    glActiveTexture(GL_TEXTURE0);
-    tex1->SetActive();
-    glActiveTexture(GL_TEXTURE1);
-    tex2->SetActive();
-
-    // Draw the vertex buffer
-    vBuffer->Draw();
+    // Draw the cube
+    cube->Draw();
 
     //  Swap buffer that contains render info and outputs it to the screen
     glfwSwapBuffers(mWindow);

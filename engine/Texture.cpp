@@ -6,7 +6,7 @@
 Texture::Texture(const char *textureFile)
     : mTextureID(0), mWidth(0), mHeight(0), mNumChannels(0)
 {
-    // Create a texture object with glGenTextures:
+    //   Create a texture object with glGenTextures:
     // - Takes in the number of textures to generate
     // - The unsigned int array to store the number of textures(can be a single uint)
     glGenTextures(1, &mTextureID);
@@ -27,6 +27,7 @@ Texture::Texture(const char *textureFile)
     // Load/Generate a texture
     // Tell stb_image.h to flip loaded textures on the y axis
     stbi_set_flip_vertically_on_load(true);
+
     // Load in texture file with stbi_load:
     // - Takes the location of the image file
     // - width, height, and number of color channels as ints
@@ -45,8 +46,8 @@ Texture::Texture(const char *textureFile)
             format = GL_RGBA;
         }
 
-        // Start generating a texture using the loaded image data
-        // Textures are generated with glTexImage2D:
+        //   Start generating a texture using the loaded image data
+        //   Textures are generated with glTexImage2D:
         // - 1st argument specifies the texture target. Setting to GL_TEXTURE_2D
         //   will generate textures on the bound texture object at the same target
         // - 2nd argument specifies mipmap level to create a texture for. 0 is base level
@@ -73,6 +74,7 @@ Texture::Texture(const char *textureFile)
 Texture::~Texture()
 {
     std::cout << "Delete texture" << std::endl;
+    // Delete the texture's resources
     glDeleteTextures(1, &mTextureID);
     mTextureID = 0;
     mWidth = 0;

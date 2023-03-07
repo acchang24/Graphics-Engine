@@ -5,16 +5,18 @@
 // Shader class contains a OpenGL shader program that consists of
 // a vertex shader and a fragment shader. This shader class manages
 // when a particular shader program is being set as active, as well as
-// functions to help set any uniforms set by its shaders. The shader
-// class takes in file paths to a vertex and fragment shaders.
+// functions to help set any uniforms set by its shaders.
 class Shader
 {
 public:
+    //   Shader constructor:
+    // - const std::string& for the vertex shader name/file path
+    // - const std::string& for the fragment shader name/file path
     Shader(const std::string &vertexFile, const std::string &fragmentFile);
     ~Shader();
 
-    // Compiles both the vertex and fragment shaders and links them into a program.
-    // Takes in a char array of the vertex and fragment codes as parameters
+    //   CompileShaders compiles both the vertex and fragment shaders and links them into a program.
+    // - Takes in 2 const char* of the vertex and fragment codes as parameters
     void CompileShaders(const char *vertexCode, const char *fragmentCode);
 
     // Sets this shader program as the active one with glUseProgram
@@ -41,5 +43,6 @@ public:
     }
 
 private:
+    // The shader's ID
     unsigned int mShaderID;
 };

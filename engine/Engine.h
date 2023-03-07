@@ -5,6 +5,7 @@
 class Shader;
 class Texture;
 class VertexBuffer;
+class RenderObj;
 
 // The main Engine class that controls the graphics. This class
 // drives the input processing of any controllers/mouse/keyboard inputs,
@@ -54,6 +55,8 @@ private:
     // Textures
     Texture *tex1;
     Texture *tex2;
+
+    RenderObj *cube;
 
     // Float to keep track of the time
     float mTimer;
