@@ -16,7 +16,7 @@
 #define HEIGHT 600
 
 Engine::Engine()
-    : mWindow(nullptr), mShader(nullptr), vBuffer(nullptr), tex1(nullptr), tex2(nullptr), cube(nullptr), mTimer(0.0f), mFps(0), mIsWireFrame(false), mWirePrev(false)
+    : mWindow(nullptr), mShader(nullptr), vBuffer(nullptr), tex1(nullptr), tex2(nullptr), mTimer(0.0f), mFps(0), mIsWireFrame(false), mWirePrev(false)
 {
 }
 
@@ -147,7 +147,24 @@ bool Engine::Init()
 
     std::vector<Texture *> textures = {tex1, tex2};
 
-    cube = new RenderObj(vBuffer, mShader, textures);
+    glm::vec3 cubePositions[] = {
+        glm::vec3(0.0f, 0.0f, 0.0f),
+        glm::vec3(2.0f, 5.0f, -15.0f),
+        glm::vec3(-1.5f, -2.2f, -2.5f),
+        glm::vec3(-3.8f, -2.0f, -12.3f),
+        glm::vec3(2.4f, -0.4f, -3.5f),
+        glm::vec3(-1.7f, 3.0f, -7.5f),
+        glm::vec3(1.3f, -2.0f, -2.5f),
+        glm::vec3(1.5f, 2.0f, -2.5f),
+        glm::vec3(1.5f, 0.2f, -1.5f),
+        glm::vec3(-1.3f, 1.0f, -1.5f)};
+
+    for (int i = 0; i < 10; ++i)
+    {
+        RenderObj *newObj = new RenderObj(vBuffer, mShader, textures);
+        newObj->SetPosition(cubePositions[i]);
+        mObjects.emplace_back(newObj);
+    }
 
     return true;
 }
@@ -160,7 +177,11 @@ void Engine::Shutdown()
     delete tex1;
     delete tex2;
     delete vBuffer;
-    delete cube;
+
+    for (auto o : mObjects)
+    {
+        delete o;
+    }
 
     // Clean and delete all of GLFW's resources that were allocated
     glfwTerminate();
@@ -233,7 +254,10 @@ void Engine::ProcessInput(GLFWwindow *window)
 void Engine::Update(float deltaTime)
 {
     // Update the object
-    cube->Update(deltaTime);
+    for (auto o : mObjects)
+    {
+        o->Update(deltaTime);
+    }
 
     // View matrix
     glm::mat4 view = glm::mat4(1.0f);
@@ -263,7 +287,10 @@ void Engine::Render()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Draw the cube
-    cube->Draw();
+    for (auto o : mObjects)
+    {
+        o->Draw();
+    }
 
     //  Swap buffer that contains render info and outputs it to the screen
     glfwSwapBuffers(mWindow);

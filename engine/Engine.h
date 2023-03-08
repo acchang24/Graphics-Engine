@@ -1,6 +1,7 @@
 #pragma once
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <vector>
 
 class Shader;
 class Texture;
@@ -56,7 +57,7 @@ private:
     Texture *tex1;
     Texture *tex2;
 
-    RenderObj *cube;
+    std::vector<RenderObj *> mObjects;
 
     // Float to keep track of the time
     float mTimer;
