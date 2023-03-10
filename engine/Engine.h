@@ -3,6 +3,7 @@
 #include <GLFW/glfw3.h>
 #include <vector>
 
+class AssetManager;
 class Shader;
 class Texture;
 class VertexBuffer;
@@ -48,14 +49,9 @@ private:
     // Pointer to a GLFWwindow
     GLFWwindow *mWindow;
 
-    // The simple shader
-    Shader *mShader;
+    AssetManager *mAssetManager;
 
-    //VertexBuffer *vBuffer;
-
-    // Textures
-    //Texture *tex1;
-    //Texture *tex2;
+    // VertexBuffer *vBuffer;
 
     std::vector<RenderObj *> mObjects;
 

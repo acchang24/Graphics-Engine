@@ -1,6 +1,7 @@
 #include "Cube.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include "AssetManager.h"
 #include "VertexBuffer.h"
 #include "Shader.h"
 #include "Texture.h"
@@ -52,8 +53,10 @@ Cube::Cube() : RenderObj()
 
     mVertexBuffer = new VertexBuffer(vertices, 0, sizeof(vertices), 0, sizeof(vertices) / sizeof(VertexTexture), 0, Vertex::VertexTexture);
 
-    mTextures.emplace_back(new Texture("assets/textures/container.jpg"));
-    mTextures.emplace_back(new Texture("assets/textures/awesomeface.png"));
+    AssetManager *am = AssetManager::Get();
+
+    mTextures.emplace_back(am->LoadTexture("assets/textures/container.jpg"));
+    mTextures.emplace_back(am->LoadTexture("assets/textures/awesomeface.png"));
 }
 
 Cube::~Cube()
@@ -61,11 +64,6 @@ Cube::~Cube()
     std::cout << "Delete cube" << std::endl;
 
     delete mVertexBuffer;
-
-    for (auto t : mTextures)
-    {
-        delete t;
-    }
 }
 
 void Cube::Update(float deltaTime)

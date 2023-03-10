@@ -2,9 +2,10 @@
 #include <iostream>
 #include <glad/glad.h>
 #include "stb_image.h"
+#include "AssetManager.h"
 
 Texture::Texture(const char *textureFile)
-    : mTextureID(0), mWidth(0), mHeight(0), mNumChannels(0)
+    : mName(textureFile), mTextureID(0), mWidth(0), mHeight(0), mNumChannels(0)
 {
     //   Create a texture object with glGenTextures:
     // - Takes in the number of textures to generate
@@ -69,6 +70,9 @@ Texture::Texture(const char *textureFile)
 
     // Free image data
     stbi_image_free(data);
+
+    // Store this texture object into the texture cache using the texture's file name/path
+    AssetManager::Get()->SaveTexture(mName, this);
 }
 
 Texture::~Texture()

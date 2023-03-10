@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 
 // The Texture class helps add details to an object.
 // Loads images files with the stb_image image loader
@@ -22,6 +23,9 @@ public:
     unsigned int GetID() { return mTextureID; }
 
 private:
+    // Texture name (file path to the texture)
+    std::string mName;
+
     // Int to store the texture reference id
     unsigned int mTextureID;
 

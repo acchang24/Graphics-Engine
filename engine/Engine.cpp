@@ -5,6 +5,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include "AssetManager.h"
 #include "Shader.h"
 #include "Texture.h"
 #include "VertexFormats.h"
@@ -13,11 +14,11 @@
 #include "Cube.h"
 
 // Define a window's dimensions
-#define WIDTH 800
-#define HEIGHT 600
+#define WIDTH 1280
+#define HEIGHT 720
 
 Engine::Engine()
-    : mWindow(nullptr), mShader(nullptr), // vBuffer(nullptr), tex1(nullptr), tex2(nullptr),
+    : mWindow(nullptr), mAssetManager(nullptr), // vBuffer(nullptr),
       mTimer(0.0f), mFps(0), mIsWireFrame(false), mWirePrev(false)
 {
 }
@@ -88,66 +89,26 @@ bool Engine::Init()
     //     1, 2, 3  // second triangle
     // };
 
-    // Cube
-    VertexTexture vertices[] = {glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec2(0.0f, 0.0f),
-                                glm::vec3(0.5f, -0.5f, -0.5f), glm::vec2(1.0f, 0.0f),
-                                glm::vec3(0.5f, 0.5f, -0.5f), glm::vec2(1.0f, 1.0f),
-                                glm::vec3(0.5f, 0.5f, -0.5f), glm::vec2(1.0f, 1.0f),
-                                glm::vec3(-0.5f, 0.5f, -0.5f), glm::vec2(0.0f, 1.0f),
-                                glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec2(0.0f, 0.0f),
-
-                                glm::vec3(-0.5f, -0.5f, 0.5f), glm::vec2(0.0f, 0.0f),
-                                glm::vec3(0.5f, -0.5f, 0.5f), glm::vec2(1.0f, 0.0f),
-                                glm::vec3(0.5f, 0.5f, 0.5f), glm::vec2(1.0f, 1.0f),
-                                glm::vec3(0.5f, 0.5f, 0.5f), glm::vec2(1.0f, 1.0f),
-                                glm::vec3(-0.5f, 0.5f, 0.5f), glm::vec2(0.0f, 1.0f),
-                                glm::vec3(-0.5f, -0.5f, 0.5f), glm::vec2(0.0f, 0.0f),
-
-                                glm::vec3(-0.5f, 0.5f, 0.5f), glm::vec2(1.0f, 0.0f),
-                                glm::vec3(-0.5f, 0.5f, -0.5f), glm::vec2(1.0f, 1.0f),
-                                glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec2(0.0f, 1.0f),
-                                glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec2(0.0f, 1.0f),
-                                glm::vec3(-0.5f, -0.5f, 0.5f), glm::vec2(0.0f, 0.0f),
-                                glm::vec3(-0.5f, 0.5f, 0.5f), glm::vec2(1.0f, 0.0f),
-
-                                glm::vec3(0.5f, 0.5f, 0.5f), glm::vec2(1.0f, 0.0f),
-                                glm::vec3(0.5f, 0.5f, -0.5f), glm::vec2(1.0f, 1.0f),
-                                glm::vec3(0.5f, -0.5f, -0.5f), glm::vec2(0.0f, 1.0f),
-                                glm::vec3(0.5f, -0.5f, -0.5f), glm::vec2(0.0f, 1.0f),
-                                glm::vec3(0.5f, -0.5f, 0.5f), glm::vec2(0.0f, 0.0f),
-                                glm::vec3(0.5f, 0.5f, 0.5f), glm::vec2(1.0f, 0.0f),
-
-                                glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec2(0.0f, 1.0f),
-                                glm::vec3(0.5f, -0.5f, -0.5f), glm::vec2(1.0f, 1.0f),
-                                glm::vec3(0.5f, -0.5f, 0.5f), glm::vec2(1.0f, 0.0f),
-                                glm::vec3(0.5f, -0.5f, 0.5f), glm::vec2(1.0f, 0.0f),
-                                glm::vec3(-0.5f, -0.5f, 0.5f), glm::vec2(0.0f, 0.0f),
-                                glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec2(0.0f, 1.0f),
-
-                                glm::vec3(-0.5f, 0.5f, -0.5f), glm::vec2(0.0f, 1.0f),
-                                glm::vec3(0.5f, 0.5f, -0.5f), glm::vec2(1.0f, 1.0f),
-                                glm::vec3(0.5f, 0.5f, 0.5f), glm::vec2(1.0f, 0.0f),
-                                glm::vec3(0.5f, 0.5f, 0.5f), glm::vec2(1.0f, 0.0f),
-                                glm::vec3(-0.5f, 0.5f, 0.5f), glm::vec2(0.0f, 0.0f),
-                                glm::vec3(-0.5f, 0.5f, -0.5f), glm::vec2(0.0f, 1.0f)};
+    // AssetManager
+    mAssetManager = new AssetManager();
 
     // Shader
-    mShader = new Shader("shaders/texturedVS.glsl", "shaders/texturedFS.glsl");
+    Shader *mShader = new Shader("shaders/texturedVS.glsl", "shaders/texturedFS.glsl");
     mShader->SetActive();
 
     // Set each sampler to which texture unit it belongs to(only done once)
     mShader->SetInt("textureSampler", 0);
     mShader->SetInt("textureSampler2", 1);
 
-    // Texture
-    // tex1 = new Texture("assets/textures/container.jpg");
-    // tex2 = new Texture("assets/textures/awesomeface.png");
+    // Cache/save the shader
+    mAssetManager->SaveShader("textured", mShader);
+
+    // Create Textures
+    Texture *tex1 = new Texture("assets/textures/container.jpg");
+    Texture *tex2 = new Texture("assets/textures/awesomeface.png");
 
     // Vertex buffer
     // vBuffer = new VertexBuffer(vertices, indices, sizeof(vertices), sizeof(indices), sizeof(vertices) / sizeof(VertexTexture), sizeof(indices) / sizeof(unsigned int), Vertex::VertexTexture);
-    // vBuffer = new VertexBuffer(vertices, 0, sizeof(vertices), 0, sizeof(vertices) / sizeof(VertexTexture), 0, Vertex::VertexTexture);
-
-    // std::vector<Texture *> textures = {tex1, tex2};
 
     glm::vec3 cubePositions[] = {
         glm::vec3(0.0f, 0.0f, 0.0f),
@@ -167,9 +128,6 @@ bool Engine::Init()
         cube->SetPosition(cubePositions[i]);
         cube->SetShader(mShader);
         mObjects.emplace_back(cube);
-        // RenderObj *newObj = new RenderObj(vBuffer, mShader, textures);
-        // newObj->SetPosition(cubePositions[i]);
-        // mObjects.emplace_back(newObj);
     }
 
     return true;
@@ -179,15 +137,14 @@ void Engine::Shutdown()
 {
     std::cout << "SHUTDOWN" << std::endl;
 
-    delete mShader;
-    // delete tex1;
-    // delete tex2;
-    // delete vBuffer;
+    delete mAssetManager;
 
+    // Delete all objects
     for (auto o : mObjects)
     {
         delete o;
     }
+    mObjects.clear();
 
     // Clean and delete all of GLFW's resources that were allocated
     glfwTerminate();
@@ -279,7 +236,7 @@ void Engine::Update(float deltaTime)
     glm::mat4 viewProj = projection * view;
 
     // Get location of viewProj in shader
-    int viewProjLoc = glGetUniformLocation(mShader->GetID(), "viewProj");
+    int viewProjLoc = glGetUniformLocation(mAssetManager->Get()->LoadShader("textured")->GetID(), "viewProj");
     // Update viewProj
     glUniformMatrix4fv(viewProjLoc, 1, GL_FALSE, glm::value_ptr(viewProj));
 }
