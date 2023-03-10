@@ -10,13 +10,15 @@
 #include "VertexFormats.h"
 #include "VertexBuffer.h"
 #include "RenderObj.h"
+#include "Cube.h"
 
 // Define a window's dimensions
 #define WIDTH 800
 #define HEIGHT 600
 
 Engine::Engine()
-    : mWindow(nullptr), mShader(nullptr), vBuffer(nullptr), tex1(nullptr), tex2(nullptr), mTimer(0.0f), mFps(0), mIsWireFrame(false), mWirePrev(false)
+    : mWindow(nullptr), mShader(nullptr), // vBuffer(nullptr), tex1(nullptr), tex2(nullptr),
+      mTimer(0.0f), mFps(0), mIsWireFrame(false), mWirePrev(false)
 {
 }
 
@@ -133,19 +135,19 @@ bool Engine::Init()
     mShader = new Shader("shaders/texturedVS.glsl", "shaders/texturedFS.glsl");
     mShader->SetActive();
 
-    // Set each sampler to which texture unit it belongs to (only done once)
+    // Set each sampler to which texture unit it belongs to(only done once)
     mShader->SetInt("textureSampler", 0);
     mShader->SetInt("textureSampler2", 1);
 
     // Texture
-    tex1 = new Texture("assets/textures/container.jpg");
-    tex2 = new Texture("assets/textures/awesomeface.png");
+    // tex1 = new Texture("assets/textures/container.jpg");
+    // tex2 = new Texture("assets/textures/awesomeface.png");
 
     // Vertex buffer
     // vBuffer = new VertexBuffer(vertices, indices, sizeof(vertices), sizeof(indices), sizeof(vertices) / sizeof(VertexTexture), sizeof(indices) / sizeof(unsigned int), Vertex::VertexTexture);
-    vBuffer = new VertexBuffer(vertices, 0, sizeof(vertices), 0, sizeof(vertices) / sizeof(VertexTexture), 0, Vertex::VertexTexture);
+    // vBuffer = new VertexBuffer(vertices, 0, sizeof(vertices), 0, sizeof(vertices) / sizeof(VertexTexture), 0, Vertex::VertexTexture);
 
-    std::vector<Texture *> textures = {tex1, tex2};
+    // std::vector<Texture *> textures = {tex1, tex2};
 
     glm::vec3 cubePositions[] = {
         glm::vec3(0.0f, 0.0f, 0.0f),
@@ -161,9 +163,13 @@ bool Engine::Init()
 
     for (int i = 0; i < 10; ++i)
     {
-        RenderObj *newObj = new RenderObj(vBuffer, mShader, textures);
-        newObj->SetPosition(cubePositions[i]);
-        mObjects.emplace_back(newObj);
+        Cube *cube = new Cube();
+        cube->SetPosition(cubePositions[i]);
+        cube->SetShader(mShader);
+        mObjects.emplace_back(cube);
+        // RenderObj *newObj = new RenderObj(vBuffer, mShader, textures);
+        // newObj->SetPosition(cubePositions[i]);
+        // mObjects.emplace_back(newObj);
     }
 
     return true;
@@ -174,9 +180,9 @@ void Engine::Shutdown()
     std::cout << "SHUTDOWN" << std::endl;
 
     delete mShader;
-    delete tex1;
-    delete tex2;
-    delete vBuffer;
+    // delete tex1;
+    // delete tex2;
+    // delete vBuffer;
 
     for (auto o : mObjects)
     {
@@ -286,7 +292,7 @@ void Engine::Render()
     // Clear the color/depth buffers
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    // Draw the cube
+    // Loop through and draw all the objects
     for (auto o : mObjects)
     {
         o->Draw();

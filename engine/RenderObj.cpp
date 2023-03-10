@@ -6,6 +6,11 @@
 #include "Texture.h"
 #include <iostream>
 
+RenderObj::RenderObj()
+    : mVertexBuffer(nullptr), mShader(nullptr), mModel(glm::mat4(1.0f)), mPosition(glm::vec3(0.0f, 0.0f, 0.0f)), mScale(glm::vec3(1.0f, 1.0f, 1.0f)), mTimer(0.0f)
+{
+}
+
 RenderObj::RenderObj(VertexBuffer *vBuffer, Shader *shader, const std::vector<Texture *> &textures)
     : mVertexBuffer(vBuffer), mShader(shader), mTextures(textures), mModel(glm::mat4(1.0f)), mPosition(glm::vec3(0.0f, 0.0f, 0.0f)), mScale(glm::vec3(1.0f, 1.0f, 1.0f)), mTimer(0.0f)
 {
@@ -32,23 +37,6 @@ void RenderObj::Update(float deltaTime)
 
     // Scale
     mModel = glm::scale(mModel, mScale);
-
-    // Send model matrix to the shader
-    // Make sure the shader is set to active
-    // mShader->SetActive();
-
-    // //   Query the location of uniform containing the model matrix in shader:
-    // // - Supply with shader program
-    // // - the name of the uniform
-    // int modelLoc = glGetUniformLocation(mShader->GetID(), "model");
-
-    // //   Send to GPU
-    // //   glUniform with Matrix4fv as postfix:
-    // // - Take the uniform's location
-    // // - The number of matrices to send
-    // // - Transpose matrix (column-major or row-major). GLM uses column by default (GL_FALSE)
-    // // - The actual matrix data converted with glm::value_ptr
-    // glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(mModel));
 }
 
 void RenderObj::Draw()
@@ -62,13 +50,13 @@ void RenderObj::Draw()
         glActiveTexture(GL_TEXTURE0 + i);
         mTextures[i]->SetActive();
     }
+
     //   Query the location of uniform containing the model matrix in shader:
     // - Supply with shader program
     // - the name of the uniform
     int modelLoc = glGetUniformLocation(mShader->GetID(), "model");
 
-    //   Send to GPU
-    //   glUniform with Matrix4fv as postfix:
+    //   Send model matrix to GPU using glUniform with Matrix4fv as postfix:
     // - Take the uniform's location
     // - The number of matrices to send
     // - Transpose matrix (column-major or row-major). GLM uses column by default (GL_FALSE)

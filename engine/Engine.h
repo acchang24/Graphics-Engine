@@ -51,11 +51,11 @@ private:
     // The simple shader
     Shader *mShader;
 
-    VertexBuffer *vBuffer;
+    //VertexBuffer *vBuffer;
 
     // Textures
-    Texture *tex1;
-    Texture *tex2;
+    //Texture *tex1;
+    //Texture *tex2;
 
     std::vector<RenderObj *> mObjects;
 

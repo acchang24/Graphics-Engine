@@ -16,10 +16,11 @@ class Texture;
 class RenderObj
 {
 public:
+    RenderObj();
     //   RenderObj constructor:
     // - VertexBuffer* to handle the object's VAO, vertex/index buffer
     // - Shader* to handle how the object will look
-    // - const std::vector<Texture*> for the Object's textures
+    // - const std::vector<Texture*>& for the Object's textures
     RenderObj(VertexBuffer *vBuffer, Shader *shader, const std::vector<Texture *> &textures);
     virtual ~RenderObj();
 
@@ -28,6 +29,10 @@ public:
 
     // Draws the RenderObj
     virtual void Draw();
+
+    // Setters for Shader and Textures
+    void SetShader(Shader *shader) { mShader = shader; }
+    void AddTexture(Texture *texture) { mTextures.emplace_back(texture); }
 
     // Getters for the RenderObj's model matrix, position, and scale
     glm::mat4 &GetModelMatrix() { return mModel; }
